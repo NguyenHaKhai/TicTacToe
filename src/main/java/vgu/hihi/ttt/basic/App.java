@@ -2,74 +2,12 @@ package vgu.hihi.ttt.basic;
 import java.util.Scanner;
 
 /**
- * Hello world!
+ * This is when main function resides, and I will update 
+ * my project day by day. Hope that I get to create a better design!
  *
  */
 public class App 
 {
-    static int[] board = new int[9];
-
-    public static void printBoard() {
-        for (int i = 0; i < 9; i++) {
-            System.out.print("| " + board[i] + " ");
-            if ((i + 1) % 3 == 0) {
-                System.out.println("|");
-            }
-        }
-        System.out.println();
-    }
-
-    public static boolean isFull() {
-        for (int cell : board) {
-            if (cell == 0) return false;
-        }
-        return true;
-    }
-
-    public static int checkWinner() {
-        int[][] winPatterns = {
-                {0,1,2},{3,4,5},{6,7,8}, // rows
-                {0,3,6},{1,4,7},{2,5,8}, // cols
-                {0,4,8},{2,4,6}          // diagonals
-        };
-
-        for (int[] pattern : winPatterns) {
-            if (board[pattern[0]] != 0 &&
-                board[pattern[0]] == board[pattern[1]] &&
-                board[pattern[1]] == board[pattern[2]]) {
-                return board[pattern[0]];
-            }
-        }
-
-        return 0;
-    }
-
-    public static void computerMove() {
-        for (int i = 0; i < 9; i++) {
-            if (board[i] == 0) {
-                board[i] = 2;
-                System.out.println("Computer chooses cell " + (i + 1));
-                break;
-            }
-        }
-    }
-
-    public static void humanMove(Scanner scanner) {
-        int move;
-
-        while (true) {
-            System.out.print("Enter cell number (1-9): ");
-            move = scanner.nextInt();
-
-            if (move >= 1 && move <= 9 && board[move - 1] == 0) {
-                board[move - 1] = 1;
-                break;
-            } else {
-                System.out.println("Invalid move. Try again.");
-            }
-        }
-    }
-
     public static void main(String[] args) {
 
         if (args.length != 1) {
@@ -78,29 +16,35 @@ public class App
         }
 
         int turn = Integer.parseInt(args[0]);
+
+        // Create a board, initialize and print it out
+        Board board = new Board(4,5);
+        board.initializeBoard();
+        board.printBoard();
+
+        // Create two players: a human and a computer
         Scanner scanner = new Scanner(System.in);
+        Player Khai = new HumanPlayer(1, scanner);
+        Player Bot = new ComputerPlayer(2);
 
-        printBoard();
-
-        while (true) {
-
-            if (turn == 1) {
-                humanMove(scanner);
-            } else {
-                computerMove();
+        while(true){
+            if(turn == 1){
+                Khai.makeMove(board);
+            } else{
+                Bot.makeMove(board);
             }
 
-            printBoard();
+            board.printBoard();
 
-            int winner = checkWinner();
+            int winner = board.checkWinner3();
 
-            if (winner == 1) {
-                System.out.println("Human wins!");
+            if (winner == Khai.getId()) {
+                System.out.println("Human wins! or Player " + Khai.getId() + " wins!");
                 break;
-            } else if (winner == 2) {
-                System.out.println("Computer wins!");
+            } else if (winner == Bot.getId()) {
+                System.out.println("Computer wins! or Player " + Bot.getId() + " wins!");
                 break;
-            } else if (isFull()) {
+            } else if (board.isFull()) {
                 System.out.println("Draw!");
                 break;
             }
