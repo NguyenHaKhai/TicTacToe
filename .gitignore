@@ -1,3 +1,30 @@
+targe# --- Compiled Metadata & Artifacts ---
+*.class
+*.log
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+# --- Build Tool Directories ---
 target/
+.gradle/
+build/
+
+# --- IDE Metadata (IntelliJ, Eclipse, VS Code) ---
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# --- OS Metadata ---
 .DS_Store
+Thumbs.db
+
+# --- Sensitive Metadata ---
+.env
+*.jks
 
