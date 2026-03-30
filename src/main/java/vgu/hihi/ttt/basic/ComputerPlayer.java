@@ -7,7 +7,7 @@ public class ComputerPlayer extends Player {
     }
 
     @Override
-    public void makeMove(Board board) {
+    public void makeMove(Board2D board) {
         // simple strategy: pick first empty cell
         for (int i = 0; i < board.getSize(); i++) {
             if (board.isCellEmpty(i)) {

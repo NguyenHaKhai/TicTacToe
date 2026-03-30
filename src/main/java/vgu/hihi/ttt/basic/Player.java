@@ -13,5 +13,5 @@ public abstract class Player{
         return playerId;
     }
 
-    public abstract void makeMove(Board board);
+    public abstract void makeMove(Board2D board);
 }

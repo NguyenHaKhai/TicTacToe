@@ -31,11 +31,11 @@ public class Board{
         return row * col;
     }
 
-    public void initializeBoard(){
-        for(int i = 0; i < row * col; i++){
-            status[i] = 0;
-        }
-    }
+    // public void initializeBoard(){
+    //     for(int i = 0; i < row * col; i++){
+    //         status[i] = 0;
+    //     }
+    // }
 
     public void printBoard(){
         for (int i = 0; i < getSize(); i++) {
@@ -100,12 +100,16 @@ public class Board{
         return 0; // no winner
     }
 
-    void updateBoard(int symbol, int position){
-        status[position] = symbol;
-    }
+    // void updateBoard(int symbol, int position){
+    //     status[position] = symbol;
+    // }
 
     public boolean isCellEmpty(int position){
-        return status[position] == 0 ? true : false;
+        if (position < 0 || position >= row * col) {
+            System.out.println("Player entered out of bound position!");
+            return false; // or throw exception
+        }
+        return status[position] == 0;
     }
 
     public void setCell(int position, int playerId){

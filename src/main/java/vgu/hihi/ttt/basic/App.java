@@ -18,21 +18,34 @@ public class App
         int turn = Integer.parseInt(args[0]);
 
         // Create a board, initialize and print it out
-        Board board = new Board(4,5);
-        board.initializeBoard();
+        Board2D board = new Board2D(4,5);
+        //board.initializeBoard();
         board.printBoard();
 
         // Create two players: a human and a computer
         Scanner scanner = new Scanner(System.in);
         Player Khai = new HumanPlayer(1, scanner);
         Player Bot = new ComputerPlayer(2);
+        // // test play with 3 players
+        // Player Bot2 = new ComputerPlayer(3);
 
         while(true){
-            if(turn == 1){
-                Khai.makeMove(board);
-            } else{
-                Bot.makeMove(board);
+            switch(turn){
+                case 1:
+                    Khai.makeMove(board);
+                    break;
+                case 2:
+                    Bot.makeMove(board);
+                    break;
+                // case 3:
+                //     Bot2.makeMove(board);
+                //     break;
+                default:
+                    System.out.println("Invalid int value: Check again!");
             }
+
+            // // assume that turn goes in a cycle: 1 -> 2 -> 3 -> 1 -> 2 -> 3 -> 1 -> ...
+            // turn = ++turn > 3 ? 1 : turn;
 
             board.printBoard();
 
