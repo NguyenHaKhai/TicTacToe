@@ -18,7 +18,7 @@ public class App
         int turn = Integer.parseInt(args[0]);
 
         // Create a board, initialize and print it out
-        Board2D board = new Board2D(4,5);
+        Board board = new Board(4,5);
         //board.initializeBoard();
         board.printBoard();
 

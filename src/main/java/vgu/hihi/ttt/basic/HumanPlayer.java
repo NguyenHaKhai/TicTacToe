@@ -11,7 +11,7 @@ public class HumanPlayer extends Player{
     }
 
     @Override
-    public void makeMove(Board2D board) {
+    public void makeMove(Board board) {
         int move;
         while (true) {
             int totalCell = board.getSize();
