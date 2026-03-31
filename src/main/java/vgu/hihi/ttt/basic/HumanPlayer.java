@@ -1,13 +1,14 @@
 package vgu.hihi.ttt.basic;
 
+import java.io.InputStream;
 import java.util.Scanner;
 
 public class HumanPlayer extends Player{
     final private Scanner scanner;
 
-    public HumanPlayer(int id, Scanner scanner) {
+    public HumanPlayer(int id, InputStream in ) {
         super(id);
-        this.scanner = scanner;
+        this.scanner = new Scanner(in);
     }
 
     @Override
@@ -18,7 +19,7 @@ public class HumanPlayer extends Player{
             System.out.print("Enter cell number (1-" 
             + totalCell + "): ");
             move = scanner.nextInt();
-            if (board.isCellEmpty(move - 1)) {
+            if (board.isCellEmpty(move - 1) && !board.isCellOutOfBound(move - 1)) {
                 board.setCell(move - 1, playerId);
                 break;
             } else {

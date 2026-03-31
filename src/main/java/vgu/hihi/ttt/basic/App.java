@@ -1,5 +1,4 @@
 package vgu.hihi.ttt.basic;
-import java.util.Scanner;
 
 /**
  * This is when main function resides, and I will update 
@@ -23,8 +22,8 @@ public class App
         board.printBoard();
 
         // Create two players: a human and a computer
-        Scanner scanner = new Scanner(System.in);
-        Player Khai = new HumanPlayer(1, scanner);
+        // Scanner scanner = new Scanner(System.in);
+        Player Khai = new HumanPlayer(1, System.in);
         Player Bot = new ComputerPlayer(2);
         // // test play with 3 players
         // Player Bot2 = new ComputerPlayer(3);
@@ -65,6 +64,6 @@ public class App
             turn = (turn == 1) ? 2 : 1;
         }
 
-        scanner.close();
+        // scanner.close();
     }
 }

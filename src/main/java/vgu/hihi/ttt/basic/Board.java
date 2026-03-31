@@ -116,12 +116,21 @@ public class Board{
     //     status[position] = symbol;
     // }
 
+    // consider breaking this into 2 methods: out of boudn and isOccupied
     public boolean isCellEmpty(int position){
-        if (position < 0 || position >= row * col) {
-            System.out.println("Player entered out of bound position!");
-            return false; // or throw exception
-        }
+        // if (position < 0 || position >= row * col) {
+        //     System.out.println("Player entered out of bound position!");
+        //     return false; // or throw exception
+        // }
         return status[position] == 0;
+    }
+    
+    public boolean isCellOutOfBound(int position){
+        return (position < 0 || position >= row * col);
+    }
+
+    public int getCell(int position){
+        return status[position];
     }
 
     public void setCell(int position, int playerId){
