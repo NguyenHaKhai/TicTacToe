@@ -17,6 +17,18 @@ public class Board{
         col = 3;
         status = new int[row * col];
     }
+    // Constructor for testing
+    public Board(int r, int c, int[] desiredState){
+        row = r;
+        col = c;
+        status = new int[row * col];
+        if((row * col) == desiredState.length){
+            System.arraycopy(desiredState, 0, status, 0, desiredState.length);
+        }
+        else{
+            System.out.println("Incompatible Size: not copy contents");
+        }
+    }
 
     // basic getters, setters
     public int getRow(){
@@ -122,6 +134,15 @@ public class Board{
         }
         return true;
     }
+
+    // // copy board for testing
+    // public void copyBoard(int[] statusContents){
+    //     if(this.getSize() != statusContents.length){
+    //         System.out.println("Incompatible Size");
+    //         return;
+    //     }
+    //     System.arraycopy(statusContents, 0, status, 0, this.getSize());
+    // }
 
 }
 
