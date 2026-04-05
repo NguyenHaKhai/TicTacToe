@@ -106,4 +106,22 @@ class BoardTest{
 
         assertEquals(testBoard.checkWinner3(), 0);
     }
+
+    // test printBoard() method: initialization board
+    @Test
+    void printBoardITrue(){
+        Board testBoard = new Board();
+        String boardRep = "| 0 | 0 | 0 |\n| 0 | 0 | 0 |\n| 0 | 0 | 0 |\n";
+
+        assertTrue(testBoard.printBoard().equals(boardRep));
+    }
+
+    // test printBoard() method: custom board
+    @Test
+    void printBoardCTrue(){
+        Board testBoard = new Board(3, 4, new int[]{1,2,1,1,2,2,2,1,1,1,2,1});
+        String boardRep = "| 1 | 2 | 1 | 1 |\n| 2 | 2 | 2 | 1 |\n| 1 | 1 | 2 | 1 |\n";
+
+        assertTrue(testBoard.printBoard().equals(boardRep));
+    }
 }

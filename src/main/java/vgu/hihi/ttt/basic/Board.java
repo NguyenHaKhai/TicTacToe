@@ -49,14 +49,16 @@ public class Board{
     //     }
     // }
 
-    public void printBoard(){
+    public String printBoard(){
+        String result = "";
         for (int i = 0; i < getSize(); i++) {
-            System.out.print("| " + status[i] + " ");
+            result += "| " + status[i] + " ";
             if ((i + 1) % getCol() == 0) {
-                System.out.println("|");
+                result += "|\n";
             }
         }
-        System.out.println();
+        // result += "\n";
+        return result;
     }
 
     // Here we assume the win mode is 3 consecutive symbols

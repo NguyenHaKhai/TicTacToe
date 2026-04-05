@@ -19,7 +19,7 @@ public class App
         // Create a board, initialize and print it out
         Board board = new Board(4,5);
         //board.initializeBoard();
-        board.printBoard();
+        System.out.println(board.printBoard());
 
         // Create two players: a human and a computer
         // Scanner scanner = new Scanner(System.in);
@@ -46,7 +46,7 @@ public class App
             // // assume that turn goes in a cycle: 1 -> 2 -> 3 -> 1 -> 2 -> 3 -> 1 -> ...
             // turn = ++turn > 3 ? 1 : turn;
 
-            board.printBoard();
+            System.out.println(board.printBoard());
 
             int winner = board.checkWinner3();
 

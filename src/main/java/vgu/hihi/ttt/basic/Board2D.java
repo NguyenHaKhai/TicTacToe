@@ -32,13 +32,15 @@ public class Board2D{
         return row * col;
     }
 
-    public void printBoard(){
+    public String printBoard(){
+        String result = "";
         for(int i = 0; i < row; i++){
             for(int j = 0; j < col; j++){
-                System.out.print("| " + status[i][j] + " ");
+                result += "| " + status[i][j] + " ";
             }
-            System.out.println("|");
+            result += "|\n";
         }
+        return result;
     }
 
     public int checkWinner3(){
