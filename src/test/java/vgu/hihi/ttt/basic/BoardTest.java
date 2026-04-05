@@ -100,6 +100,7 @@ class BoardTest{
     }
 
     // test checkWinner3() method: draw
+    @Test
     void drawTrue(){
         Board testBoard = new Board(3, 3, new int[]{1,2,1,1,2,2,2,1,1});
 
