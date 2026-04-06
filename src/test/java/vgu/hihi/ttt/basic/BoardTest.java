@@ -126,9 +126,9 @@ class BoardTest{
     @Test
     void printBoardCTrue(){
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        String nl = System.lineSeparator();
 
         Board testBoard = new Board(3, 4, new int[]{1,2,1,1,2,2,2,1,1,1,2,1}, out);
+        String nl = System.lineSeparator();
         String boardRep = "| 1 | 2 | 1 | 1 |" + nl + "| 2 | 2 | 2 | 1 |" + nl + "| 1 | 1 | 2 | 1 |" + nl;
 
         testBoard.printBoard();

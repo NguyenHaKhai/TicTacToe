@@ -3,8 +3,8 @@ package vgu.hihi.ttt.basic;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -15,7 +15,7 @@ class HumanPlayerTest{
     // test makeMove() method: user plays 3 and that cell equals to 1
     @Test
     void makeMoveTrue(){
-        String input = "3\n";
+        String input = "3" + System.lineSeparator();
         InputStream in = new ByteArrayInputStream(input.getBytes());
 
         HumanPlayer Khai = new HumanPlayer(1, in);

@@ -11,6 +11,8 @@ public class HumanPlayer extends Player{
         this.scanner = new Scanner(in);
     }
 
+    // note: use readline, refactor makeMove: not include System.out, avoid using methods from Board
+    // idea: move most of the code to App.java
     @Override
     public void makeMove(Board board) {
         int move;
