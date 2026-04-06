@@ -1,27 +1,61 @@
 package vgu.hihi.ttt.basic;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 public class Board{
     
     private int row;
     private int col;
     private int[] status;
+    private PrintStream printer;
+    // consider adding PrintStream, then in construction
+    // define something like printer = new PrintStream(out);
 
     // Constructors for board
     public Board(int r, int c){
         row = r;
         col = c;
         status = new int[row * col];
+        printer = new PrintStream(System.out);
     }
     public Board(){
         row = 3;
         col = 3;
         status = new int[row * col];
+        printer = new PrintStream(System.out);
     }
     // Constructor for testing
     public Board(int r, int c, int[] desiredState){
         row = r;
         col = c;
         status = new int[row * col];
+        // printer = new PrintStream(out);
+        if((row * col) == desiredState.length){
+            System.arraycopy(desiredState, 0, status, 0, desiredState.length);
+        }
+        else{
+            System.out.println("Incompatible Size: not copy contents");
+        }
+    }
+
+    public Board(int r, int c, ByteArrayOutputStream out){
+        row = r;
+        col = c;
+        status = new int[row * col];
+        printer = new PrintStream(out);
+    }
+    public Board(ByteArrayOutputStream out){
+        row = 3;
+        col = 3;
+        status = new int[row * col];
+        printer = new PrintStream(out);
+    }
+
+    public Board(int r, int c, int[] desiredState, ByteArrayOutputStream out){
+        row = r;
+        col = c;
+        status = new int[row * col];
+        printer = new PrintStream(out);
         if((row * col) == desiredState.length){
             System.arraycopy(desiredState, 0, status, 0, desiredState.length);
         }
@@ -49,16 +83,18 @@ public class Board{
     //     }
     // }
 
-    public String printBoard(){
-        String result = "";
+    // consider changing status[i] to a method get() to be 
+    // more abstract -> good for Board2D also
+    public void printBoard(){
+        // String result = "";
         for (int i = 0; i < getSize(); i++) {
-            result += "| " + status[i] + " ";
+            printer.print("| " + status[i] + " ");
             if ((i + 1) % getCol() == 0) {
-                result += "|\n";
+                printer.print("|\n");
             }
         }
         // result += "\n";
-        return result;
+        // return result;
     }
 
     // Here we assume the win mode is 3 consecutive symbols

@@ -1,5 +1,7 @@
 package vgu.hihi.ttt.basic;
 
+import java.io.ByteArrayOutputStream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -110,18 +112,26 @@ class BoardTest{
     // test printBoard() method: initialization board
     @Test
     void printBoardITrue(){
-        Board testBoard = new Board();
-        String boardRep = "| 0 | 0 | 0 |\n| 0 | 0 | 0 |\n| 0 | 0 | 0 |\n";
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        assertTrue(testBoard.printBoard().equals(boardRep));
+        Board testBoard = new Board(out);
+        String nl = System.lineSeparator();
+        String boardRep = "| 0 | 0 | 0 |" + nl + "| 0 | 0 | 0 |" + nl + "| 0 | 0 | 0 |" + nl;
+
+        testBoard.printBoard();
+        assertEquals(boardRep, out.toString());
     }
 
     // test printBoard() method: custom board
     @Test
     void printBoardCTrue(){
-        Board testBoard = new Board(3, 4, new int[]{1,2,1,1,2,2,2,1,1,1,2,1});
-        String boardRep = "| 1 | 2 | 1 | 1 |\n| 2 | 2 | 2 | 1 |\n| 1 | 1 | 2 | 1 |\n";
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        String nl = System.lineSeparator();
 
-        assertTrue(testBoard.printBoard().equals(boardRep));
+        Board testBoard = new Board(3, 4, new int[]{1,2,1,1,2,2,2,1,1,1,2,1}, out);
+        String boardRep = "| 1 | 2 | 1 | 1 |" + nl + "| 2 | 2 | 2 | 1 |" + nl + "| 1 | 1 | 2 | 1 |" + nl;
+
+        testBoard.printBoard();
+        assertEquals(boardRep, out.toString());
     }
 }
