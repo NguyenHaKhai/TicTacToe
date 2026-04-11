@@ -30,18 +30,13 @@ public class App
 
         while(true){
             switch(turn){
-                case 1:
-                    Khai.makeMove(board);
-                    break;
-                case 2:
-                    Bot.makeMove(board);
-                    break;
-                // case 3:
-                //     Bot2.makeMove(board);
-                //     break;
-                default:
-                    System.out.println("Invalid int value: Check again!");
+                case 1 -> Khai.makeMove(board);
+                case 2 -> Bot.makeMove(board);
+                default -> System.out.println("Invalid int value: Check again!");
             }
+            // case 3:
+            //     Bot2.makeMove(board);
+            //     break;
 
             // // assume that turn goes in a cycle: 1 -> 2 -> 3 -> 1 -> 2 -> 3 -> 1 -> ...
             // turn = ++turn > 3 ? 1 : turn;
