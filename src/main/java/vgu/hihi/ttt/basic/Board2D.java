@@ -1,9 +1,9 @@
 package vgu.hihi.ttt.basic;
 
-public class Board2D{
+import java.io.PrintStream;
 
-    private int row;
-    private int col;
+public class Board2D extends Board{
+
     private int[][] status;
     
     // constructor
@@ -11,38 +11,30 @@ public class Board2D{
         row = r;
         col = c;
         status = new int[r][c];
+        printer = new PrintStream(System.out);
     }
 
     Board2D(){
         row = 3;
         col = 3;
         status = new int[3][3];
+        printer = new PrintStream(System.out);
     }
 
-    // basic getters, setters
-    public int getRow(){
-        return row;
-    }
-
-    public int getCol(){
-        return col;
-    }
-
-    public int getSize(){
-        return row * col;
-    }
-
-    public String printBoard(){
-        String result = "";
-        for(int i = 0; i < row; i++){
-            for(int j = 0; j < col; j++){
-                result += "| " + status[i][j] + " ";
+    @Override
+    public void printBoard(){
+        // String result = "";
+        for (int i = 0; i < getSize(); i++) {
+            printer.print("| " + getCell(i) + " ");
+            if ((i + 1) % getCol() == 0) {
+                printer.print("|\n");
             }
-            result += "|\n";
         }
-        return result;
+        // result += "\n";
+        // return result;
     }
 
+    @Override
     public int checkWinner3(){
         // check rows
         for (int r = 0; r < row; r++) {
@@ -107,19 +99,27 @@ public class Board2D{
         return 0; // no winner
     }
 
+    @Override
     public boolean isCellEmpty(int position){
-        if (position < 0 || position >= row * col) {
-            System.out.println("Player entered out of bound position!");
-            return false; // or throw exception
-        }
+        // if (position < 0 || position >= row * col) {
+        //     System.out.println("Player entered out of bound position!");
+        //     return false; // or throw exception
+        // }
         // x * col + y = position
         return status[position / col][position % col] == 0;
     }
 
+    @Override
+    public int getCell(int position){
+        return status[position / col][position % col];
+    }
+
+    @Override
     public void setCell(int position, int playerId){
         status[position / col][position % col] = playerId;
     }
 
+    @Override
     public boolean isFull() {
         for(int i = 0; i < row; i++){
             for(int j = 0; j < col; j++){

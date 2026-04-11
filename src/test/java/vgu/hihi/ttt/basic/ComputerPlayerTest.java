@@ -12,7 +12,7 @@ class ComputerPlayerTest{
     @Test
     void makeMoveETrue(){
         ComputerPlayer bot = new ComputerPlayer(2);
-        Board testBoard = new Board();
+        Board1D testBoard = new Board1D();
         
         bot.makeMove(testBoard);
 
@@ -23,7 +23,7 @@ class ComputerPlayerTest{
     @Test
     void makeMoveCTrue(){
         ComputerPlayer bot = new ComputerPlayer(2);
-        Board testBoard = new Board(3, 3, new int[]{1,1,0,2,1,2,1,1,0});
+        Board1D testBoard = new Board1D(3, 3, new int[]{1,1,0,2,1,2,1,1,0});
         
         bot.makeMove(testBoard);
 
