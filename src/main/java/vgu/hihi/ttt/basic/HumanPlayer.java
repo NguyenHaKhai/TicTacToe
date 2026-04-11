@@ -13,6 +13,7 @@ public class HumanPlayer extends Player{
 
     // note: use readline, refactor makeMove: not include System.out, avoid using methods from Board
     // idea: move most of the code to App.java
+    // important: check for cellOfBound first
     @Override
     public void makeMove(Board board) {
         int move;
@@ -21,7 +22,7 @@ public class HumanPlayer extends Player{
             System.out.print("Enter cell number (1-" 
             + totalCell + "): ");
             move = scanner.nextInt();
-            if (board.isCellEmpty(move - 1) && !board.isCellOutOfBound(move - 1)) {
+            if (!board.isCellOutOfBound(move - 1) && board.isCellEmpty(move - 1)) {
                 board.setCell(move - 1, playerId);
                 break;
             } else {

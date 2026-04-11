@@ -17,7 +17,7 @@ public class App
         int turn = Integer.parseInt(args[0]);
 
         // Create a board, initialize and print it out
-        Board board = new Board(4,5);
+        Board board = new Board2D(4,5);
         //board.initializeBoard();
         board.printBoard();
 
@@ -30,18 +30,13 @@ public class App
 
         while(true){
             switch(turn){
-                case 1:
-                    Khai.makeMove(board);
-                    break;
-                case 2:
-                    Bot.makeMove(board);
-                    break;
-                // case 3:
-                //     Bot2.makeMove(board);
-                //     break;
-                default:
-                    System.out.println("Invalid int value: Check again!");
+                case 1 -> Khai.makeMove(board);
+                case 2 -> Bot.makeMove(board);
+                default -> System.out.println("Invalid int value: Check again!");
             }
+            // case 3:
+            //     Bot2.makeMove(board);
+            //     break;
 
             // // assume that turn goes in a cycle: 1 -> 2 -> 3 -> 1 -> 2 -> 3 -> 1 -> ...
             // turn = ++turn > 3 ? 1 : turn;

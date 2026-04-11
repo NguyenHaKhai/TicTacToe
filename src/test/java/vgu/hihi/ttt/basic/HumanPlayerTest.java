@@ -19,7 +19,7 @@ class HumanPlayerTest{
         InputStream in = new ByteArrayInputStream(input.getBytes());
 
         HumanPlayer Khai = new HumanPlayer(1, in);
-        Board testBoard = new Board();
+        Board1D testBoard = new Board1D();
         
         Khai.makeMove(testBoard);
 
@@ -34,7 +34,7 @@ class HumanPlayerTest{
         InputStream in = new ByteArrayInputStream(input.getBytes());
 
         HumanPlayer Khai = new HumanPlayer(1, in);
-        Board testBoard = new Board(3, 3, new int[]{1,2,0,2,1,2,1,1,0});
+        Board1D testBoard = new Board1D(3, 3, new int[]{1,2,0,2,1,2,1,1,0});
 
         Khai.makeMove(testBoard);
 
