@@ -8,25 +8,25 @@ import org.junit.jupiter.api.Test;
  */
 class ComputerPlayerTest{
 
-    // test makeMove() method: bot plays 1 at an empty Board
+    // test makeMove() method: bot plays 1 at an empty Board: return valid move
     @Test
     void makeMoveETrue(){
         ComputerPlayer bot = new ComputerPlayer(2);
-        Board1D testBoard = new Board1D();
+        Board testBoard = new Board1D();
         
-        bot.makeMove(testBoard);
+        int result = bot.makeMove(testBoard);
 
-        assertEquals(testBoard.getCell(0), 2);
+        assertEquals(result, 0);
     }
 
-    // test makeMove() method: bot plays 1 at an custom Board
+    // test makeMove() method: bot plays 1 at an custom Board: return invalid move
     @Test
     void makeMoveCTrue(){
         ComputerPlayer bot = new ComputerPlayer(2);
-        Board1D testBoard = new Board1D(3, 3, new int[]{1,1,0,2,1,2,1,1,0});
+        Board testBoard = new Board1D(3, 3, new int[]{1,1,0,2,1,2,1,1,0});
         
-        bot.makeMove(testBoard);
+        int result = bot.makeMove(testBoard);
 
-        assertEquals(testBoard.getCell(2), 2);
+        assertEquals(result, -1);
     }
 }

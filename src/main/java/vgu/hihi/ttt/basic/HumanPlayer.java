@@ -15,20 +15,14 @@ public class HumanPlayer extends Player{
     // idea: move most of the code to App.java
     // important: check for cellOfBound first
     @Override
-    public void makeMove(Board board) {
+    public int makeMove(Board board) {
         int move;
-        while (true) {
-            int totalCell = board.getSize();
+        int totalCell = board.getSize();
             System.out.print("Enter cell number (1-" 
             + totalCell + "): ");
-            move = scanner.nextInt();
-            if (!board.isCellOutOfBound(move - 1) && board.isCellEmpty(move - 1)) {
-                board.setCell(move - 1, playerId);
-                break;
-            } else {
-                System.out.println("Cell is not empty! Try again.");
-            }
-        }
+        move = scanner.nextInt();
+        if (!board.isCellOutOfBound(move - 1) && board.isCellEmpty(move - 1)) return move - 1;
+        else return -1;
     }
 
 }
