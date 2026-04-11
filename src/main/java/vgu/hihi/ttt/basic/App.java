@@ -14,6 +14,7 @@ public class App
             return;
         }
 
+        // now test
         int turn = Integer.parseInt(args[0]);
 
         // Create a board, initialize and print it out
