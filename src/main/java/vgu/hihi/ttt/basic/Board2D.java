@@ -1,5 +1,6 @@
 package vgu.hihi.ttt.basic;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 public class Board2D extends Board{
@@ -19,6 +20,55 @@ public class Board2D extends Board{
         col = 3;
         status = new int[3][3];
         printer = new PrintStream(System.out);
+    }
+
+    // constructor for testing
+    
+    public Board2D(int r, int c, int[][] desiredState) {
+        this.row = r;
+        this.col = c;
+        this.status = new int[row][col];
+
+        // Check if the outer array length matches the row count
+        if (desiredState.length == row && desiredState[0].length == col) {
+            for (int i = 0; i < row; i++) {
+                // Copy each row individually
+                System.arraycopy(desiredState[i], 0, this.status[i], 0, col);
+            }
+        } else {
+            System.out.println("Incompatible Size: not copying contents");
+        }
+    }
+
+    public Board2D(int r, int c, ByteArrayOutputStream out){
+        row = r;
+        col = c;
+        status = new int[row][col];
+        printer = new PrintStream(out);
+    }
+
+    public Board2D(ByteArrayOutputStream out){
+        row = 3;
+        col = 3;
+        status = new int[row][col];
+        printer = new PrintStream(out);
+    }
+
+    public Board2D(int r, int c, int[][] desiredState, ByteArrayOutputStream out) {
+        this.row = r;
+        this.col = c;
+        printer = new PrintStream(out);
+        this.status = new int[row][col];
+
+        // Check if the outer array length matches the row count
+        if (desiredState.length == row && desiredState[0].length == col) {
+            for (int i = 0; i < row; i++) {
+                // Copy each row individually
+                System.arraycopy(desiredState[i], 0, this.status[i], 0, col);
+            }
+        } else {
+            System.out.println("Incompatible Size: not copying contents");
+        }
     }
 
     @Override

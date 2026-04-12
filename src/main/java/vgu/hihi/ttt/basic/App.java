@@ -28,7 +28,7 @@ public class App
 
         // Create two players: a human and a computer
         // Scanner scanner = new Scanner(System.in);
-        Player Khai = new HumanPlayer(1, System.in);
+        Player Khai = new HumanPlayer(1);
         Player Bot = new ComputerPlayer(2);
         // // test play with 3 players
         // Player Bot2 = new ComputerPlayer(3);
