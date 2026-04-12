@@ -6,6 +6,11 @@ import java.util.Scanner;
 public class HumanPlayer extends Player{
     final private Scanner scanner;
 
+    public HumanPlayer(int id ) {
+        super(id);
+        this.scanner = new Scanner(System.in);
+    }
+    // testing
     public HumanPlayer(int id, InputStream in ) {
         super(id);
         this.scanner = new Scanner(in);
@@ -20,8 +25,11 @@ public class HumanPlayer extends Player{
         int totalCell = board.getSize();
             System.out.print("Enter cell number (1-" 
             + totalCell + "): ");
-        move = scanner.nextInt();
-        if (!board.isCellOutOfBound(move - 1) && board.isCellEmpty(move - 1)) return move - 1;
+        if(scanner.hasNextInt()){
+            move = scanner.nextInt();
+            if (!board.isCellOutOfBound(move - 1) && board.isCellEmpty(move - 1)) return move - 1;
+            else return -1;
+        }
         else return -1;
     }
 

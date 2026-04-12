@@ -38,4 +38,18 @@ class HumanPlayerTest{
 
         assertEquals(result, -1);
     }
+
+    // test makeMove() method: user plays abc: results in a invalid move(-1)
+    @Test
+    void makeMoveInvalidCharTrue(){
+        String input = "abc" + System.lineSeparator();
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+
+        HumanPlayer Khai = new HumanPlayer(1, in);
+        Board testBoard = new Board1D(3, 3, new int[]{1,2,0,2,1,2,1,1,0});
+
+        int result = Khai.makeMove(testBoard);
+
+        assertEquals(result, -1);
+    }
 }
