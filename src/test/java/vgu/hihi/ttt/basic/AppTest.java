@@ -70,4 +70,17 @@ class AppTest {
         assertEquals("Please, input a valid option [1-2]", scanner.readLine());
     }
     
+    // startup: test with space "1 "
+    @Test
+    void startWSpacedArg() throws IOException{
+        App.main(new String[]{"1 "});
+        assertEquals("Please, input a valid option [1-2]", scanner.readLine());
+    }
+
+    // startup: test with space "'1'"
+    @Test
+    void startWQuotedArg() throws IOException{
+        App.main(new String[]{"'1'"});
+        assertEquals("Please, input a valid option [1-2]", scanner.readLine());
+    }
 }

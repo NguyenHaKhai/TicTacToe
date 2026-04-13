@@ -8,7 +8,8 @@ package vgu.hihi.ttt.basic;
 public class App 
 {
     public static void main(String[] args) {
-
+        // consider putting the game inside another thread to test the behaviour: otw it will freeze waiting for the while loop to finish
+        // consider putting the logic inside another java file: Game or GameLogic
         if (args.length != 1) {
             System.out.println("Please, input a valid option [1-2]");
             return;
@@ -25,6 +26,7 @@ public class App
             System.out.println("Please, input a valid option [1-2]");
             return;
         }
+        // temp
         
 
         // Create a board, initialize and print it out
@@ -33,6 +35,7 @@ public class App
         System.out.println("Hello!");
         board.printBoard();
 
+        
         // Create two players: a human and a computer
         // Scanner scanner = new Scanner(System.in);
         Player Khai = new HumanPlayer(1);
@@ -85,7 +88,7 @@ public class App
 
             // turn = (turn == 1) ? 2 : 1;
         }
-
+        
         // scanner.close();
     }
 }
@@ -101,3 +104,6 @@ public class App
 //                 System.out.println("Cell is not empty! Try again.");
 //             }
 //         }
+
+
+// the second and third last not done, the fourth last will be done by lecturer
