@@ -10,15 +10,22 @@ public class App
     public static void main(String[] args) {
 
         if (args.length != 1) {
-            System.out.println("Usage: java TicTacToe [1|2]");
+            System.out.println("Please, input a valid option [1-2]");
             return;
         }
 
-        int turn = Integer.parseInt(args[0]);
+        int turn;
+        try {
+            turn = Integer.parseInt(args[0]);
         if(turn != 1 && turn != 2){
-            System.out.println("Usage: java TicTacToe [1|2]");
+            System.out.println("Please, input a valid option [1-2]");
             return;
         }
+        } catch (NumberFormatException e) {
+            System.out.println("Please, input a valid option [1-2]");
+            return;
+        }
+        
 
         // Create a board, initialize and print it out
         Board board = new Board2D(4,5);
