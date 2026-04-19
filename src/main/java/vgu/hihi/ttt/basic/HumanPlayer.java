@@ -22,15 +22,29 @@ public class HumanPlayer extends Player{
     @Override
     public int makeMove(Board board) {
         int move;
-        int totalCell = board.getSize();
-            System.out.print("Enter cell number (1-" 
-            + totalCell + "): ");
-        if(scanner.hasNextInt()){
-            move = scanner.nextInt();
-            if (!board.isCellOutOfBound(move - 1) && board.isCellEmpty(move - 1)) return move - 1;
+        String data = scanner.nextLine();
+        if(isInteger(data)){
+            move = Integer.parseInt(data);
+            if (!board.isCellOutOfBound(move - 1)){
+                if(board.isCellEmpty(move - 1)) return move - 1;
+                else return -2; // signal occupied cell
+            } 
             else return -1;
         }
+        else if(data.equals("q")) return -3; // handle end game
         else return -1;
     }
+
+    private boolean isInteger(String str) {
+    if (str == null || str.isEmpty()) {
+        return false;
+    }
+    try {
+        Integer.parseInt(str);
+        return true;
+    } catch (NumberFormatException e) {
+        return false;
+    }
+}
 
 }

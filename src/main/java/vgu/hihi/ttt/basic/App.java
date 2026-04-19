@@ -30,7 +30,7 @@ public class App
         
 
         // Create a board, initialize and print it out
-        Board board = new Board2D(4,5);
+        Board board = new Board2D();
         //board.initializeBoard();
         System.out.println("Hello!");
         board.printBoard();
@@ -42,53 +42,8 @@ public class App
         Player Bot = new ComputerPlayer(2);
         // // test play with 3 players
         // Player Bot2 = new ComputerPlayer(3);
-        
-        while(turn != 0){
-            int moveMade = 0;
-            if(turn == 1){
-                moveMade = Khai.makeMove(board);
-                if(moveMade != -1){
-                    board.setCell(moveMade, Khai.getId());
-                    turn = Bot.getId();
-                }
-                else System.out.println("Cell is not valid! Try again.");
-            }
-            else if(turn == 2){
-                moveMade = Bot.makeMove(board);
-                if(moveMade != -1){
-                    board.setCell(moveMade, Bot.getId());
-                    turn = Khai.getId();
-                }
-            }
-            else System.out.println("Invalid int value: Check again!"); //optional, since handled at the start already          
-            
-            
-            // case 3:
-            //     Bot2.makeMove(board);
-            //     break;
-
-            // // assume that turn goes in a cycle: 1 -> 2 -> 3 -> 1 -> 2 -> 3 -> 1 -> ...
-            // turn = ++turn > 3 ? 1 : turn;
-
-            board.printBoard();
-            System.out.println("");
-
-            int winner = board.checkWinner3();
-
-            if (winner == Khai.getId()) {
-                System.out.println("Human wins! or Player " + Khai.getId() + " wins!");
-                break;
-            } else if (winner == Bot.getId()) {
-                System.out.println("Computer wins! or Player " + Bot.getId() + " wins!");
-                break;
-            } else if (board.isFull()) {
-                System.out.println("Draw!");
-                break;
-            }
-
-            // turn = (turn == 1) ? 2 : 1;
-        }
-        
+        Game game = new Game(board, Khai, Bot, turn);
+        game.play();
         // scanner.close();
     }
 }

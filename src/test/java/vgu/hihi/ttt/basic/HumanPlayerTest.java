@@ -36,7 +36,7 @@ class HumanPlayerTest{
 
         int result = Khai.makeMove(testBoard);
 
-        assertEquals(result, -1);
+        assertEquals(result, -2);
     }
 
     // test makeMove() method: user plays abc: results in a invalid move(-1)
