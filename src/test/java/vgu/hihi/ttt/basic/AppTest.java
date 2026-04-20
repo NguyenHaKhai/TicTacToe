@@ -90,9 +90,9 @@ class AppTest {
         } catch(IOException e){}  
     }
 
-    // startup with invalid argument
+    // startup with invalid argument: abc
     @Test
-    void startWIArg() throws IOException{
+    void startWIArgabc() throws IOException{
         ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputByteArray, true));
         App.main(new String[]{"abc"});
@@ -103,9 +103,48 @@ class AppTest {
         } catch(IOException e){}  
     }
 
-    // startup with more than 1 argument
+    // startup with invalid argument: -1
     @Test
-    void startWMoreArg() throws IOException{
+    void startWIArgMinusOne() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+        App.main(new String[]{"-1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            assertEquals("Please, input a valid option [1-2]", reader.readLine());
+        } catch(IOException e){}  
+    }
+
+    // startup with invalid argument: 3
+    @Test
+    void startWIArgDrei() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+        App.main(new String[]{"3"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            assertEquals("Please, input a valid option [1-2]", reader.readLine());
+        } catch(IOException e){}  
+    }
+
+    // startup with invalid argument: 0
+    @Test
+    void startWIArgZero() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+        App.main(new String[]{"0"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            assertEquals("Please, input a valid option [1-2]", reader.readLine());
+        } catch(IOException e){}  
+    }
+
+    // startup with more than 1 argument: extra
+    @Test
+    void startWMoreArgExtra() throws IOException{
         ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputByteArray, true));
         App.main(new String[]{"1", "extra"});
@@ -113,6 +152,38 @@ class AppTest {
         byte[] printout = outputByteArray.toByteArray();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
             assertEquals("Please, input a valid option [1-2]", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // startup with more than 1 argument: 1 2
+    @Test
+    void startWMoreArgOneTwo() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+        App.main(new String[]{"1", "2"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            assertEquals("Please, input a valid option [1-2]", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // startup with 01
+    @Test
+    void startWZeroOne() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = "q" + System.lineSeparator();
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"01"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            assertEquals("Hello!", reader.readLine());
         } catch(IOException e){}
     }
     
@@ -142,9 +213,9 @@ class AppTest {
         } catch(IOException e){}
     }
 
-    // Startup Message and Order
+    // Startup Message and Order with Human
     @Test
-    void startMessOrd() throws IOException{
+    void startMessOrdWithHuman() throws IOException{
         ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputByteArray, true));
 
@@ -166,15 +237,67 @@ class AppTest {
         } catch(IOException e){}
     }
 
-    // Human Non-Integer Input
-    // Typing 3 next after x meaning that the program waits for output
-    // also, since the rep is changed: | 0 | 0 | 1 | -> mapping is correct 
+    // Startup Message and Order with Computer
+    @Test
+    void startMessOrdWithComputer() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = "q" + System.lineSeparator();
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"2"});
+
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            assertEquals("Hello!", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("Player#2's turn", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Board render: initialization and update
+    @Test
+    void boardRender() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"5","q"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(1, reader);
+
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+        
+            assertEquals("Player#1's turn", reader.readLine());
+
+            assertEquals("| 0 | 0 | 0 |", reader.readLine()); 
+            assertEquals("| 0 | 1 | 0 |", reader.readLine()); // game updates
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+
+        } catch(IOException e){}
+    }
+
+    // human non-int output three times
     @Test
     void humanNonInt() throws IOException{
         ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputByteArray, true));
 
-        String data = joinByNewline(new String[]{"x","3","q"});
+        String data = joinByNewline(new String[]{"abc","@","","q"});
         byte[] byteArray = data.getBytes();
         InputStream inputStream = new ByteArrayInputStream(byteArray);
         System.setIn(inputStream);
@@ -185,10 +308,13 @@ class AppTest {
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
             skipLines(5, reader);
             assertEquals("Please, input a valid number [1-9]", reader.readLine());
-        
             assertEquals("Player#1's turn", reader.readLine());
 
-            assertEquals("| 0 | 0 | 1 |", reader.readLine()); // game continues
+            assertEquals("Please, input a valid number [1-9]", reader.readLine());
+            assertEquals("Player#1's turn", reader.readLine());
+
+            assertEquals("Please, input a valid number [1-9]", reader.readLine());
+            assertEquals("Player#1's turn", reader.readLine());
         } catch(IOException e){}
     }
 
