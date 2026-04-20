@@ -366,6 +366,55 @@ class AppTest {
         } catch(IOException e){}
     }
 
+    // quit game with q
+    @Test
+    void quitGameWq() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = "q" + System.lineSeparator();
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(5, reader);
+            assertEquals("End of the game", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // verify q case sensitivity
+    @Test
+    void qSensitivity() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"Q"," q","q ","q"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(5, reader);
+
+            assertEquals("Please, input a valid number [1-9]", reader.readLine());
+            assertEquals("Player#1's turn", reader.readLine());
+
+            assertEquals("Please, input a valid number [1-9]", reader.readLine());
+            assertEquals("Player#1's turn", reader.readLine());
+
+            assertEquals("Please, input a valid number [1-9]", reader.readLine());
+            assertEquals("Player#1's turn", reader.readLine());
+        } catch(IOException e){}
+    }
+
 }
 // preparation to remove threads
 // ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
