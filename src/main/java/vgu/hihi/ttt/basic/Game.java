@@ -14,7 +14,7 @@ public class Game {
     }
 
     public void play(){
-        Thread gameThread = new Thread(() -> {
+        // Thread gameThread = new Thread(() -> {
             while(turn != 0){
             int moveMade;
             if(turn == player1.getId()){
@@ -58,26 +58,26 @@ public class Game {
 
             // turn = (turn == 1) ? 2 : 1;
         }
-        });
-        gameThread.start();
+        // });
+        // gameThread.start();
     }
 
     private void progress(){
         board.printBoard();
-            System.out.println("");
+        // System.out.println("");
 
-            int winner = board.checkWinner3();
+        int winner = board.checkWinner3();
 
-            if (winner == player1.getId()) {
-                System.out.println("Player#" + player1.getId() + " won");
-                turn = 0;
-            } else if (winner == player2.getId()) {
-                System.out.println("Player#" + player2.getId() + " won");
-                turn = 0;
-            } else if (board.isFull()) {
-                System.out.println("It is a draw!");
-                turn = 0;
-            }
+        if (winner == player1.getId()) {
+            System.out.println("Player#" + player1.getId() + " won");
+            turn = 0;
+        } else if (winner == player2.getId()) {
+            System.out.println("Player#" + player2.getId() + " won");
+            turn = 0;
+        } else if (board.isFull()) {
+            System.out.println("It is a draw!");
+            turn = 0;
+        }
     }
     // consider implement in the future when player1 is not human
     private void humanPlay(){
