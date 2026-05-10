@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -356,11 +357,11 @@ class AppTest {
         InputStream inputStream = new ByteArrayInputStream(byteArray);
         System.setIn(inputStream);
 
-        App.main(new String[]{"2"});
+        App.main(new String[]{"1"});
 
         byte[] printout = outputByteArray.toByteArray();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
-            skipLines(9, reader);
+            skipLines(13, reader);
             assertEquals("The cell is occupied!", reader.readLine());
             assertEquals("Player#1's turn", reader.readLine());
         } catch(IOException e){}
@@ -415,6 +416,305 @@ class AppTest {
         } catch(IOException e){}
     }
 
+    // Human win detection on row/column/diagonal
+    @Test
+    void humanWinDetect() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"3","5","7"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(24, reader);
+            assertEquals("Player#1 won!", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Computer win detection on row/column/diagonal
+    @Test
+    void ComputerWinDetect() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"4","5","7"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(28, reader);
+            assertEquals("Player#2 won!", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Draw Detection
+    @Test
+    void DrawDetect() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"2","4","5","7","9"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(40, reader);
+            assertEquals("It is a draw!", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Computer behaviour detection
+    @Test
+    void ComputerBehaviourDetect() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"2","q"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"2"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(5, reader);
+            assertEquals("| 2 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            skipLines(5, reader);
+            assertEquals("| 2 | 1 | 2 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Board integrity after every move. Note: not sure if this satisfies the requirement
+    @Test
+    void BoardIntegrity() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"2","3","5","q"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(5, reader);
+            assertEquals("| 0 | 1 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            skipLines(5, reader);
+            assertEquals("| 2 | 1 | 1 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            skipLines(5, reader);
+            assertEquals("| 2 | 1 | 1 |", reader.readLine());
+            assertEquals("| 2 | 1 | 0 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+            skipLines(1, reader);
+            assertEquals("| 2 | 1 | 1 |", reader.readLine());
+            assertEquals("| 2 | 1 | 2 |", reader.readLine());
+            assertEquals("| 0 | 0 | 0 |", reader.readLine());
+
+        } catch(IOException e){}
+    }
+
+    // Turn prompt sequence correctness
+    @Test
+    void PromptCorrectness() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"abc","2","1","3","q"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(5, reader);
+            assertEquals("Please, input a valid number [1-9]", reader.readLine());
+            
+            assertEquals("Player#1's turn", reader.readLine());
+            skipLines(3, reader);
+            assertEquals("Player#2's turn", reader.readLine());
+            skipLines(3, reader);
+            assertEquals("Player#1's turn", reader.readLine());
+            assertEquals("The cell is occupied!", reader.readLine());
+            assertEquals("Player#1's turn", reader.readLine());
+            skipLines(3, reader);
+            assertEquals("Player#2's turn", reader.readLine());
+
+
+        } catch(IOException e){}
+    }
+
+    // Program termination behavior on final states: Player 1 wins
+    @Test
+    void PlayerOneWins() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"4","5","6"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(24, reader);
+            assertEquals("Player#1 won!", reader.readLine());
+            assertEquals(null, reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Program termination behavior on final states: Player 2 wins
+    @Test
+    void PlayerTwoWins() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"4","5","7"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(28, reader);
+            assertEquals("Player#2 won!", reader.readLine());
+            assertEquals(null, reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Program termination behavior on final states: Player 1 entered "q"
+    @Test
+    void UserEntersq() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"4","5","3","q"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(29, reader);
+            assertEquals("End of the game", reader.readLine());
+            assertEquals(null, reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Program termination behavior on final states: draw
+    @Test
+    void DrawTermination() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"4","5","3","8","9"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(40, reader);
+            assertEquals("It is a draw!", reader.readLine());
+            assertEquals(null, reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Input robustness under rapid invalid retries. Note: dont know how can do it rapidly
+    @Test
+    void RapidInvalidEntries() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"test","test","test","test","test","test","test","test","test","test","XY",
+        "XY", "XY","XY","XY","XY","XY","XY","XY","XY","100","100","100","100"
+        ,"100","100","100","100","100","-1","-1","-1","-1","-1","-1", "q"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(75, reader);
+            assertEquals("End of the game", reader.readLine());
+            assertEquals(null, reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // Output consistency with exact required strings: done above
+
+    // non-integer parsing normalization
+    @Test
+    void NotTrimmedBeforeValidation() throws IOException{
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputByteArray, true));
+
+        String data = joinByNewline(new String[]{"5 " ,"q"});
+        byte[] byteArray = data.getBytes();
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        System.setIn(inputStream);
+
+        App.main(new String[]{"1"});
+
+        byte[] printout = outputByteArray.toByteArray();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
+            skipLines(5, reader);
+            assertEquals("Please, input a valid number [1-9]", reader.readLine());
+        } catch(IOException e){}
+    }
+
+    // test the program exits gracefully: stimulate Ctrl Z
+    @Test
+    void testGracefulExitOnBrokenPipe() {
+        try {
+        // 2. Set the sabotaged stream
+        System.setOut(new BrokenPipeStream());
+
+        // 3. Run the app with "1" (Human starts)
+        // We expect the app to try and print "Hello!" or the board and hit the exception
+        App.main(new String[]{"1"});
+        
+        } catch (Exception e) {
+            // 4. If your App.main doesn't catch the error, the test fails here.
+            // If App.main handles it gracefully, the test passes.
+            fail("The application did not handle the broken pipe gracefully!");
+        }
+    }
 }
 // preparation to remove threads
 // ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
@@ -431,3 +731,5 @@ class AppTest {
 // try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(printout), StandardCharsets.UTF_8))){
 
 // }
+
+// turn the Exception when using EOF

@@ -15,6 +15,7 @@ public class Game {
 
     public void play(){
         // Thread gameThread = new Thread(() -> {
+        
             while(turn != 0){
             int moveMade;
             if(turn == player1.getId()){
@@ -60,6 +61,8 @@ public class Game {
         }
         // });
         // gameThread.start();
+        
+            
     }
 
     private void progress(){
@@ -69,10 +72,10 @@ public class Game {
         int winner = board.checkWinner3();
 
         if (winner == player1.getId()) {
-            System.out.println("Player#" + player1.getId() + " won");
+            System.out.println("Player#" + player1.getId() + " won!");
             turn = 0;
         } else if (winner == player2.getId()) {
-            System.out.println("Player#" + player2.getId() + " won");
+            System.out.println("Player#" + player2.getId() + " won!");
             turn = 0;
         } else if (board.isFull()) {
             System.out.println("It is a draw!");

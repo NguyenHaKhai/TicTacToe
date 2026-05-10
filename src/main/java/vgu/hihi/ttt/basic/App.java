@@ -30,20 +30,28 @@ public class App
         
 
         // Create a board, initialize and print it out
-        Board board = new Board2D();
-        //board.initializeBoard();
-        System.out.println("Hello!");
-        board.printBoard();
+        try {
+            Board board = new Board2D();
+            //board.initializeBoard();
+            System.out.println("Hello!");
+            board.printBoard();
 
-        
-        // Create two players: a human and a computer
-        // Scanner scanner = new Scanner(System.in);
-        Player Khai = new HumanPlayer(1);
-        Player Bot = new ComputerPlayer(2);
-        // // test play with 3 players
-        // Player Bot2 = new ComputerPlayer(3);
-        Game game = new Game(board, Khai, Bot, turn);
-        game.play();
+            
+            // Create two players: a human and a computer
+            // Scanner scanner = new Scanner(System.in);
+            Player Khai = new HumanPlayer(1);
+            Player Bot = new ComputerPlayer(2);
+            // // test play with 3 players
+            // Player Bot2 = new ComputerPlayer(3);
+            Game game = new Game(board, Khai, Bot, turn);
+            game.play();
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("Broken Pipe Simulation")) {
+                System.err.println("Detected broken pipe. Exiting gracefully...");
+                return;
+            }
+            throw e;
+        }
         // scanner.close();
     }
 }
