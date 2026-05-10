@@ -20,7 +20,8 @@ public class Game {
             int moveMade;
             if(turn == player1.getId()){
                 System.out.println("Player#" + player1.getId() + "'s turn");
-                moveMade = player1.makeMove(board);
+                moveMade = player1.makeMove(board); 
+                    // TODO: make enum
                     if(moveMade == -3){
                         System.out.println("End of the game");
                         turn = 0;
