@@ -22,6 +22,11 @@ public class HumanPlayer extends Player{
     @Override
     public int makeMove(Board board) {
         int move;
+        
+        if (!scanner.hasNextLine()) {
+            return -3; // client disconnected, end game
+        }
+
         String data = scanner.nextLine();
         if(isInteger(data)){
             move = Integer.parseInt(data);
