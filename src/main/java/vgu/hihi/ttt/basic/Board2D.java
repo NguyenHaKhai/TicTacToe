@@ -8,14 +8,14 @@ public class Board2D extends Board{
     private int[][] status;
     
     // constructor
-    Board2D(int r, int c){
+    public Board2D(int r, int c){
         row = r;
         col = c;
         status = new int[r][c];
         printer = new PrintStream(System.out);
     }
 
-    Board2D(){
+    public Board2D(){
         row = 3;
         col = 3;
         status = new int[3][3];
@@ -72,16 +72,22 @@ public class Board2D extends Board{
     }
 
     @Override
-    public void printBoard(){
-        // String result = "";
+    public String printBoard(){
+        String result = "";
         for (int i = 0; i < getSize(); i++) {
             printer.print("| " + getCell(i) + " ");
+
+            // for the cl-sv
+            result += "| " + getCell(i) + " ";
             if ((i + 1) % getCol() == 0) {
                 printer.print("|\n");
+
+                // for the cl-sv
+                result += "|\n";
             }
         }
         // result += "\n";
-        // return result;
+        return result;
     }
 
     @Override

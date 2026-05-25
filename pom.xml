@@ -31,7 +31,7 @@
                 <archive>
                     <manifest>
                         <addClasspath>true</addClasspath>
-                        <mainClass>vgu.hihi.ttt.basic.App</mainClass>
+                        <!-- <mainClass>vgu.hihi.ttt.basic.App</mainClass> -->
                     </manifest>
                 </archive>
             </configuration>
@@ -41,7 +41,7 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>3.13.0</version>
             <configuration>
-                <release>21</release>
+                <release>25</release>
             </configuration>
         </plugin>
           <plugin>
@@ -70,6 +70,53 @@
                 </execution>
             </executions>
         </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.7.1</version>
+            <executions>
+                <!-- Server JAR -->
+                <execution>
+                    <id>server-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.serverclient.Server</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-server-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- Client JAR -->
+                <execution>
+                    <id>client-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.serverclient.Client</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-client-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
     </plugins>
-</build>
+  </build>
 </project>

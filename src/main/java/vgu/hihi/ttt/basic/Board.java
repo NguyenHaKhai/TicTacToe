@@ -24,9 +24,12 @@ public abstract class Board {
         return (position < 0 || position >= row * col);
     }
 
+    public void setPrinter(PrintStream printer) {
+        this.printer = printer;
+    }
 
 
-    public abstract void printBoard();
+    public abstract String printBoard();
     public abstract int checkWinner3();
     public abstract boolean isCellEmpty(int position);
     public abstract int getCell(int position);

@@ -70,16 +70,22 @@ public class Board1D extends Board{
     // consider changing status[i] to a method get() to be 
     // more abstract -> good for Board2D also
     @Override
-    public void printBoard(){
-        // String result = "";
+    public String printBoard(){
+        String result = "";
         for (int i = 0; i < getSize(); i++) {
             printer.print("| " + getCell(i) + " ");
+
+            // for the cl-sv
+            result += "| " + getCell(i) + " ";
             if ((i + 1) % getCol() == 0) {
                 printer.print("|\n");
+
+                // for the cl-sv
+                result += "|\n";
             }
         }
         // result += "\n";
-        // return result;
+        return result;
     }
 
     // Here we assume the win mode is 3 consecutive symbols
