@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
@@ -12,28 +14,48 @@ import vgu.hihi.ttt.basic.Game;
 import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
 
-public class ServerType1 {
+public class ServerType2 {
     private static final int PORT = 1234;
+    private static final int THREAD_POOL_SIZE = 4;
+
 
     private ServerSocket serverSocket;
+    private ExecutorService threadPool;
 
-    public ServerType1() throws IOException {
+
+    public ServerType2() throws IOException {
         serverSocket = new ServerSocket(PORT);
-        System.out.println("Server started on port " + PORT);
+        threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+        System.out.println("Server type 2 started on port " + PORT);
+        System.out.println("Thread pool size: " + THREAD_POOL_SIZE);
         System.out.println("Waiting for client connection...");
     }
 
     public void start() {
         while (true) {
-            try (Socket clientSocket = serverSocket.accept()) {
-                System.out.println("Client connected!");
-                
-                handleClient(clientSocket); 
+        try {
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("Client connected!");
 
-            } catch (IOException e) {
-                System.err.println("Server error: " + e.getMessage());
-            }
+            threadPool.execute(() -> {
+                    try {
+                        handleClient(clientSocket);
+                    } catch (IOException e) {
+                        System.err.println("Client error: " + e.getMessage());
+                    } finally {
+                        try {
+                            clientSocket.close();
+                        } catch (IOException e) {
+                            System.err.println("Error closing client socket: " + e.getMessage());
+                        }
+                    }
+            });
+
+        } catch (IOException e) {
+            System.err.println("Server error: " + e.getMessage());
         }
+    }
     }
 
     private void handleClient(Socket clientSocket) throws IOException {
@@ -87,7 +109,7 @@ public class ServerType1 {
 
     public static void main(String[] args) {
         try {
-            ServerType1 server = new ServerType1();
+            ServerType2 server = new ServerType2();
             server.start();
         } catch (IOException e) {
             System.err.println("Failed to start server: " + e.getMessage());

@@ -75,9 +75,9 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <version>3.7.1</version>
             <executions>
-                <!-- Server JAR -->
+                <!-- App JAR -->
                 <execution>
-                    <id>server-jar</id>
+                    <id>app-jar</id>
                     <phase>package</phase>
                     <goals>
                         <goal>single</goal>
@@ -85,13 +85,53 @@
                     <configuration>
                         <archive>
                             <manifest>
-                                <mainClass>vgu.hihi.ttt.basic.serverclient.Server</mainClass>
+                                <mainClass>vgu.hihi.ttt.basic.App</mainClass>
                             </manifest>
                         </archive>
                         <descriptorRefs>
                             <descriptorRef>jar-with-dependencies</descriptorRef>
                         </descriptorRefs>
-                        <finalName>ttt-server-${project.version}</finalName>
+                        <finalName>ttt-app-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- ServerType1 JAR -->
+                <execution>
+                    <id>server-type1-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.ServerType1</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-server-type1-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- ServerType2 JAR -->
+                <execution>
+                    <id>server-type2-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.ServerType2</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-server-type2-${project.version}</finalName>
                         <appendAssemblyId>false</appendAssemblyId>
                     </configuration>
                 </execution>
@@ -105,7 +145,7 @@
                     <configuration>
                         <archive>
                             <manifest>
-                                <mainClass>vgu.hihi.ttt.basic.serverclient.Client</mainClass>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.Client</mainClass>
                             </manifest>
                         </archive>
                         <descriptorRefs>
