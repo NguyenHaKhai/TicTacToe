@@ -71,18 +71,28 @@ public class Board2D extends Board{
         }
     }
 
+    // ! may be depreacated
+    // public Board2D(int r, int c, String messBoard){
+    //     // for the cl-sv type 3
+    //     row = r;
+    //     col = c;
+    //     status = new int[row][col];
+    //     printer = new PrintStream(System.out);
+    //     updateBoard(messBoard);
+    // }
+
     @Override
     public String printBoard(){
         String result = "";
         for (int i = 0; i < getSize(); i++) {
             printer.print("| " + getCell(i) + " ");
 
-            // for the cl-sv
+            // for the cl-sv type 1, 2
             result += "| " + getCell(i) + " ";
             if ((i + 1) % getCol() == 0) {
                 printer.print("|\n");
 
-                // for the cl-sv
+                // for the cl-sv type 1, 2
                 result += "|\n";
             }
         }
@@ -183,5 +193,37 @@ public class Board2D extends Board{
             }
         }
         return true;
+    }
+
+    @Override
+    public String toMessage() {
+        String message = "";
+        for(int i = 0; i < getSize(); i++){
+            message += getCell(i) + " ";
+        }
+        return message.trim(); // trim the last white space
+    }
+
+    @Override
+    public void updateBoard(String messBoard) {
+        // task: parse the message string of the board to update status[][]
+        if (messBoard == null) {
+            throw new IllegalArgumentException("Board message must not be null");
+        }
+
+        String[] cells = messBoard.trim().split("\\s+");
+        if (cells.length != getSize()) {
+            throw new IllegalArgumentException(
+                "Expected " + getSize() + " board cells, received " + cells.length
+            );
+        }
+
+        for(int i = 0; i < getSize(); i++){
+            int cellValue = Integer.parseInt(cells[i]);
+            if (cellValue < 0 || cellValue > 2) {
+                throw new IllegalArgumentException("Unsupported board cell value: " + cellValue);
+            }
+            setCell(i, cellValue);
+        }
     }
 }

@@ -35,5 +35,7 @@ public abstract class Board {
     public abstract int getCell(int position);
     public abstract void setCell(int position, int playerId);
     public abstract boolean isFull();
+    public abstract String toMessage(); // to convert to message exchanged between cl & sv type 3
+    public abstract void updateBoard(String messBoard);
 }
 

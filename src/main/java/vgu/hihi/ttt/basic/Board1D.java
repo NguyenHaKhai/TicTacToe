@@ -61,6 +61,12 @@ public class Board1D extends Board{
         }
     }
 
+    // ! may be depreacated
+    // public Board1D(int r, int c, String messBoard){
+    //     // for the cl-sv type 3
+        
+    // }
+
     // public void initializeBoard(){
     //     for(int i = 0; i < row * col; i++){
     //         status[i] = 0;
@@ -75,12 +81,12 @@ public class Board1D extends Board{
         for (int i = 0; i < getSize(); i++) {
             printer.print("| " + getCell(i) + " ");
 
-            // for the cl-sv
+            // for the cl-sv type 1, 2
             result += "| " + getCell(i) + " ";
             if ((i + 1) % getCol() == 0) {
                 printer.print("|\n");
 
-                // for the cl-sv
+                // for the cl-sv type 1, 2
                 result += "|\n";
             }
         }
@@ -176,6 +182,22 @@ public class Board1D extends Board{
             if (cell == 0) return false;
         }
         return true;
+    }
+    @Override
+    public String toMessage() {
+        String message = "";
+        for(int x : status){
+            message += x + " ";
+        }
+        return message.trim(); // trim the last white space
+    }
+    @Override
+    public void updateBoard(String messBoard) {
+        // task: parse the message string of the board to update status[]
+        String[] cells = messBoard.split(" ");
+        for(int i = 0; i < getSize(); i++){
+            setCell(i, Integer.parseInt(cells[i]));
+        }
     }
 
     // // copy board for testing
