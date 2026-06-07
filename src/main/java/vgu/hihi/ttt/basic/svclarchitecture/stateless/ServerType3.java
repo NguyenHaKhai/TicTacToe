@@ -72,14 +72,15 @@ public class ServerType3 {
             return;
         }
 
-        ResponseStatelessDumb response = process(requestLine);
+        ServerDumbMess response = process(requestLine);
         output.println(response.toProtocolMessage());
+        System.out.println(response.toProtocolMessage());
     }
 
-    private ResponseStatelessDumb process(String requestLine) {
-        RequestStatelessDumb request = RequestStatelessDumb.parse(requestLine);
+    private ServerDumbMess process(String requestLine) {
+        ClientDumbMess request = ClientDumbMess.parse(requestLine);
         if (request.state() != GameState.CONT) {
-            return new ResponseStatelessDumb(request.state(), request.boardMessage());
+            return new ServerDumbMess(request.state(), request.boardMessage());
         }
 
         Board2D board = new Board2D();
@@ -94,31 +95,29 @@ public class ServerType3 {
         int humanMove = human.makeMove(board);
         GameState humanMoveState = mapHumanMoveState(humanMove);
         if (humanMoveState != GameState.CONT) {
-            return new ResponseStatelessDumb(humanMoveState, board.toMessage());
+            return new ServerDumbMess(humanMoveState, board.toMessage());
         }
 
         board.setCell(humanMove, human.getId());
         if (board.checkWinner3() == human.getId()) {
-            return new ResponseStatelessDumb(GameState.WIN, board.toMessage());
+            return new ServerDumbMess(GameState.WIN, board.toMessage());
         }
         if (board.isFull()) {
-            return new ResponseStatelessDumb(GameState.DRAW, board.toMessage());
+            return new ServerDumbMess(GameState.DRAW, board.toMessage());
         }
 
         int computerMove = computer.makeMove(board);
-        if (computerMove < 0) {
-            return new ResponseStatelessDumb(GameState.DRAW, board.toMessage());
-        }
+        while(computerMove == -1) computer.makeMove(board); // attempt until find a valid move
 
         board.setCell(computerMove, computer.getId());
         if (board.checkWinner3() == computer.getId()) {
-            return new ResponseStatelessDumb(GameState.LOST, board.toMessage());
+            return new ServerDumbMess(GameState.LOST, board.toMessage());
         }
         if (board.isFull()) {
-            return new ResponseStatelessDumb(GameState.DRAW, board.toMessage());
+            return new ServerDumbMess(GameState.DRAW, board.toMessage());
         }
 
-        return new ResponseStatelessDumb(GameState.CONT, board.toMessage());
+        return new ServerDumbMess(GameState.CONT, board.toMessage());
     }
 
     private GameState mapHumanMoveState(int move) {
