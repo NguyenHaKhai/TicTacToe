@@ -77,6 +77,7 @@ public class ClientType3 {
 
             try {
                 ServerDumbMess response = sendOneTurn(moveText, board.toMessage());
+                System.out.println(response.toProtocolMessage());
                 updateLocalBoard(response);
                 printResult(response.state());
                 playing = !isTerminal(response.state());
@@ -88,6 +89,8 @@ public class ClientType3 {
                 return;
             }
         }
+        System.out.println();
+        board.printBoard();
     }
 
     private ServerDumbMess sendOneTurn(String moveText, String boardMessage) throws IOException {

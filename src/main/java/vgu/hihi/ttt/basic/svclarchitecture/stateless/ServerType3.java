@@ -53,6 +53,7 @@ public class ServerType3 {
 
             while (true) {
                 try (Socket clientSocket = serverSocket.accept()) {
+                    System.out.println("Client connected!");
                     handleClient(clientSocket);
                 } catch (IOException e) {
                     System.err.println("Client request failed: " + e.getMessage());
@@ -79,9 +80,16 @@ public class ServerType3 {
 
     private ServerDumbMess process(String requestLine) {
         ClientDumbMess request = ClientDumbMess.parse(requestLine);
-        if (request.state() != GameState.CONT) {
-            return new ServerDumbMess(request.state(), request.boardMessage());
-        }
+        System.out.println(request.toProtocolMessage());
+        // if (request.moveText().equalsIgnoreCase("q")){
+        //     return new ServerDumbMess(GameState.END, request.boardMessage());
+        // }
+
+        // try {
+        //     Integer.parseInt(request.moveText());
+        // } catch (NumberFormatException e) {
+        //     return new ServerDumbMess(GameState.INVALID, request.boardMessage());
+        // }
 
         Board2D board = new Board2D();
         board.updateBoard(request.boardMessage());
@@ -107,7 +115,7 @@ public class ServerType3 {
         }
 
         int computerMove = computer.makeMove(board);
-        while(computerMove == -1) computer.makeMove(board); // attempt until find a valid move
+        while(computerMove == -1) computerMove = computer.makeMove(board); // attempt until find a valid move
 
         board.setCell(computerMove, computer.getId());
         if (board.checkWinner3() == computer.getId()) {
