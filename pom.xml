@@ -135,7 +135,47 @@
                         <appendAssemblyId>false</appendAssemblyId>
                     </configuration>
                 </execution>
-                <!-- Client JAR -->
+                <!-- ServerType3 JAR -->
+                <execution>
+                    <id>server-type3-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.stateless.ServerType3</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-server-type3-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- ServerType4 JAR -->
+                <execution>
+                    <id>server-type4-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.securestateless.ServerType4</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-server-type4-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- Client JAR (type1 and type2) -->
                 <execution>
                     <id>client-jar</id>
                     <phase>package</phase>
@@ -152,6 +192,46 @@
                             <descriptorRef>jar-with-dependencies</descriptorRef>
                         </descriptorRefs>
                         <finalName>ttt-client-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- ClientType3 JAR -->
+                <execution>
+                    <id>client-type3-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.stateless.ClientType3</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-client-type3-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- ClientType4 JAR -->
+                <execution>
+                    <id>client-type4-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.securestateless.ClientType4</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-client-type4-${project.version}</finalName>
                         <appendAssemblyId>false</appendAssemblyId>
                     </configuration>
                 </execution>
