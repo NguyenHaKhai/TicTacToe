@@ -16,26 +16,15 @@ import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
 
 /**
- * Stateless Server:
- * 1. Accept client connection.
- * 2. Read one request line.
- * 3. Parse move and board state.
- * 4. Reconstruct Board2D from the board state.
- * 5. Validate:
- *  - move is number
- *  - move is in range
- *  - target cell is empty
- *  - board shape is valid
- * 6. Apply human move.
- * 7. Check winner/draw/quit.
- * 8. If game continues, apply computer move.
- * 9. Check winner/draw again.
- * 10. Send structured response with official updated board.
+ * Stateless server using a one-request-per-turn protocol.
+ * The client starts with "0|0", then the server creates and returns the
+ * official initial board. Later requests send "move|board".
  */
 public class ServerType3 {
     private static final int DEFAULT_PORT = 1234;
     private static final int HUMAN_ID = 1;
     private static final int COMPUTER_ID = 2;
+    private static final String START_GAME_MESSAGE = "0|0";
 
     private final int port;
 
@@ -49,7 +38,7 @@ public class ServerType3 {
 
     public void start() throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Stateless server started on port " + port);
+            System.out.println("Stateless Dumb server started on port " + port);
 
             while (true) {
                 try (Socket clientSocket = serverSocket.accept()) {
@@ -73,7 +62,12 @@ public class ServerType3 {
             return;
         }
 
-        ServerDumbMess response = process(requestLine);
+        ServerDumbMess response;
+        try {
+            response = process(requestLine);
+        } catch (IllegalArgumentException e) {
+            response = new ServerDumbMess(GameState.INVALID, "0");
+        }
         output.println(response.toProtocolMessage());
         System.out.println(response.toProtocolMessage());
     }
@@ -81,18 +75,18 @@ public class ServerType3 {
     private ServerDumbMess process(String requestLine) {
         ClientDumbMess request = ClientDumbMess.parse(requestLine);
         System.out.println(request.toProtocolMessage());
-        // if (request.moveText().equalsIgnoreCase("q")){
-        //     return new ServerDumbMess(GameState.END, request.boardMessage());
-        // }
 
-        // try {
-        //     Integer.parseInt(request.moveText());
-        // } catch (NumberFormatException e) {
-        //     return new ServerDumbMess(GameState.INVALID, request.boardMessage());
-        // }
+        if (isStartGameRequest(request)) {
+            Board2D newBoard = new Board2D();
+            return createGame(newBoard);
+        }
 
         Board2D board = new Board2D();
-        board.updateBoard(request.boardMessage());
+        try {
+            board.updateBoard(request.boardMessage());
+        } catch (IllegalArgumentException e) {
+            return new ServerDumbMess(GameState.INVALID, request.boardMessage());
+        }
 
         Player human = new HumanPlayer(
             HUMAN_ID,
@@ -103,29 +97,44 @@ public class ServerType3 {
         int humanMove = human.makeMove(board);
         GameState humanMoveState = mapHumanMoveState(humanMove);
         if (humanMoveState != GameState.CONT) {
-            return new ServerDumbMess(humanMoveState, board.toMessage());
+            return responseFor(humanMoveState, board);
         }
 
         board.setCell(humanMove, human.getId());
         if (board.checkWinner3() == human.getId()) {
-            return new ServerDumbMess(GameState.WIN, board.toMessage());
+            return responseFor(GameState.WIN, board);
         }
         if (board.isFull()) {
-            return new ServerDumbMess(GameState.DRAW, board.toMessage());
+            return responseFor(GameState.DRAW, board);
         }
 
         int computerMove = computer.makeMove(board);
-        while(computerMove == -1) computerMove = computer.makeMove(board); // attempt until find a valid move
+        while (computerMove == -1) {
+            computerMove = computer.makeMove(board); // attempt to find 1 valid move for computer
+        }
 
         board.setCell(computerMove, computer.getId());
         if (board.checkWinner3() == computer.getId()) {
-            return new ServerDumbMess(GameState.LOST, board.toMessage());
+            return responseFor(GameState.LOST, board);
         }
         if (board.isFull()) {
-            return new ServerDumbMess(GameState.DRAW, board.toMessage());
+            return responseFor(GameState.DRAW, board);
         }
 
-        return new ServerDumbMess(GameState.CONT, board.toMessage());
+        return responseFor(GameState.CONT, board);
+    }
+
+    private boolean isStartGameRequest(ClientDumbMess request) {
+        return START_GAME_MESSAGE.equals(request.toProtocolMessage());
+    }
+
+    private ServerDumbMess createGame(Board2D board) {
+        return responseFor(GameState.CONT, board);
+    }
+
+    private ServerDumbMess responseFor(GameState state, Board2D board) {
+        String boardMessage = board.toMessage();
+        return new ServerDumbMess(state, boardMessage);
     }
 
     private GameState mapHumanMoveState(int move) {

@@ -12,28 +12,8 @@ import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
 
 /**
- * Fat Client with more logic to handle the scalability issue.
- 1. Initialize empty local board.
-2. Print local board.
-3. Ask user for move.
-4. Send move + current board to server.
-5. Receive structured response.
-6. Replace local board with board returned by server.
-7. Print message/result.
-8. If status is WIN, DRAW, or QUIT, close.
-9. Otherwise continue.
- */
-/**
- * Fat client.
- * 1- Initialize empty local board.
- * 2- Print local board.
- * 3- Ask user for move.
- * 4- Send move + current board to server.
- * 5- Receive structured repsonse.
- * 6- Replace local board with board returned by server.
- * 7- Print message/result
- * 8- If status is WIN, DRAW, or QUIT, close.
- * 9- Otherwise continue.
+ * Stateless client using a one-request-per-turn protocol.
+ * The server sends the official initial board after the start request.
  */
 public class ClientType3 {
     private static final String DEFAULT_HOST = "localhost";
@@ -59,6 +39,17 @@ public class ClientType3 {
         System.out.println("========== TIC-TAC-TOE ==========");
         System.out.println("Connected mode: stateless TCP request/response");
 
+        try {
+            ServerDumbMess response = sendMessage(new ClientDumbMess("0", "0"));
+            updateLocalState(response);
+        } catch (IOException e) {
+            System.err.println("Could not start game: " + e.getMessage());
+            return;
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid server response: " + e.getMessage());
+            return;
+        }
+
         boolean playing = true;
         while (playing) {
             System.out.println();
@@ -76,9 +67,9 @@ public class ClientType3 {
             }
 
             try {
-                ServerDumbMess response = sendOneTurn(moveText, board.toMessage());
+                ServerDumbMess response = sendOneTurn(moveText);
                 System.out.println(response.toProtocolMessage());
-                updateLocalBoard(response);
+                updateLocalState(response);
                 printResult(response.state());
                 playing = !isTerminal(response.state());
             } catch (IOException e) {
@@ -93,14 +84,18 @@ public class ClientType3 {
         board.printBoard();
     }
 
-    private ServerDumbMess sendOneTurn(String moveText, String boardMessage) throws IOException {
+    private ServerDumbMess sendOneTurn(String moveText) throws IOException {
+        return sendMessage(new ClientDumbMess(moveText, board.toMessage()));
+    }
+
+    private ServerDumbMess sendMessage(ClientDumbMess request) throws IOException {
         try (Socket socket = new Socket(host, port);
              BufferedReader input = new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8)
              );
              PrintWriter output = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8)) {
 
-            output.println(moveText + "|" + boardMessage);
+            output.println(request.toProtocolMessage());
 
             String responseLine = input.readLine();
             if (responseLine == null) {
@@ -111,7 +106,7 @@ public class ClientType3 {
         }
     }
 
-    private void updateLocalBoard(ServerDumbMess response) {
+    private void updateLocalState(ServerDumbMess response) {
         if (!response.boardMessage().isBlank()) {
             board.updateBoard(response.boardMessage());
         }
