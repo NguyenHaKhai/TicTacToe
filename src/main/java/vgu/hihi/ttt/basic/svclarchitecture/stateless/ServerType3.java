@@ -19,12 +19,13 @@ import vgu.hihi.ttt.basic.Player;
  * Stateless server using a one-request-per-turn protocol.
  * The client starts with "0|0", then the server creates and returns the
  * official initial board. Later requests send "move|board".
+ * START|1 for human to start
+ * START|2 for computer to start
  */
 public class ServerType3 {
     private static final int DEFAULT_PORT = 1234;
     private static final int HUMAN_ID = 1;
     private static final int COMPUTER_ID = 2;
-    private static final String START_GAME_MESSAGE = "0|0";
 
     private final int port;
 
@@ -77,8 +78,9 @@ public class ServerType3 {
         System.out.println(request.toProtocolMessage());
 
         if (isStartGameRequest(request)) {
+            String turnStart = request.boardMessage();
             Board2D newBoard = new Board2D();
-            return createGame(newBoard);
+            return createGame(newBoard, turnStart);
         }
 
         Board2D board = new Board2D();
@@ -125,10 +127,18 @@ public class ServerType3 {
     }
 
     private boolean isStartGameRequest(ClientDumbMess request) {
-        return START_GAME_MESSAGE.equals(request.toProtocolMessage());
+        return "START".equals(request.moveText());
     }
 
-    private ServerDumbMess createGame(Board2D board) {
+    private ServerDumbMess createGame(Board2D board, String turnStart) {
+        if(turnStart.equals("2")) { // computer moves first
+            Player computer = new ComputerPlayer(COMPUTER_ID);
+            int computerMove = computer.makeMove(board);
+            while (computerMove == -1) {
+                computerMove = computer.makeMove(board); // attempt to find 1 valid move for computer
+            }
+            board.setCell(computerMove, computer.getId()); 
+        }
         return responseFor(GameState.CONT, board);
     }
 

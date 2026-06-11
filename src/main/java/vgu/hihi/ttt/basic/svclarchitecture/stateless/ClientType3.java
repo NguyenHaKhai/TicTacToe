@@ -14,23 +14,28 @@ import vgu.hihi.ttt.basic.GameState;
 /**
  * Stateless client using a one-request-per-turn protocol.
  * The server sends the official initial board after the start request.
+ * START|1 for human to start
+ * START|2 for computer to start
  */
 public class ClientType3 {
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1234;
+    private static final String DEFAULT_START = "1";
 
     private final String host;
     private final int port;
+    private final String turnStart;
     private final Board2D board;
     private final Scanner scanner;
 
     public ClientType3() {
-        this(DEFAULT_HOST, DEFAULT_PORT);
+        this(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_START);
     }
 
-    public ClientType3(String host, int port) {
+    public ClientType3(String host, int port, String turnStart) {
         this.host = host;
         this.port = port;
+        this.turnStart = turnStart;
         this.board = new Board2D();
         this.scanner = new Scanner(System.in);
     }
@@ -40,7 +45,7 @@ public class ClientType3 {
         System.out.println("Connected mode: stateless TCP request/response");
 
         try {
-            ServerDumbMess response = sendMessage(new ClientDumbMess("0", "0"));
+            ServerDumbMess response = sendMessage(new ClientDumbMess("START", turnStart));
             updateLocalState(response);
         } catch (IOException e) {
             System.err.println("Could not start game: " + e.getMessage());
@@ -132,17 +137,25 @@ public class ClientType3 {
     }
 
     public static void main(String[] args) {
+        String turnStart = DEFAULT_START;
         String host = DEFAULT_HOST;
         int port = DEFAULT_PORT;
 
         if (args.length > 0) {
-            host = args[0];
+            turnStart = args[0];
+            if(!turnStart.equals("1") || turnStart.equals("2")){
+                System.out.println("Usage: 1 for human first, 2 for computer first");
+                return;
+            }
         }
         if (args.length > 1) {
-            port = Integer.parseInt(args[1]);
+            host = args[1];
+        }
+        if (args.length > 2) {
+            port = Integer.parseInt(args[2]);
         }
 
-        new ClientType3(host, port).start();
+        new ClientType3(host, port, turnStart).start();
     }
 
 }
