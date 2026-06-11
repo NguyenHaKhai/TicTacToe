@@ -1,4 +1,4 @@
-package vgu.hihi.ttt.basic.svclarchitecture.securestateless;
+package vgu.hihi.ttt.basic.svclarchitecture.advancedsecure;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -37,7 +37,7 @@ import vgu.hihi.ttt.basic.Player;
  * 9. Check winner/draw again.
  * 10. Send structured response with official updated board.
  */
-public class ServerType4 {
+public class ServerType5 {
     private static final int DEFAULT_PORT = 1234;
     private static final int HUMAN_ID = 1;
     private static final int COMPUTER_ID = 2;
@@ -47,11 +47,11 @@ public class ServerType4 {
     private final String secretKey;
     private final Map<String, String> gameHashes;
 
-    public ServerType4() {
+    public ServerType5() {
         this(DEFAULT_PORT);
     }
 
-    public ServerType4(int port) {
+    public ServerType5(int port) {
         this.port = port;
         this.secretKey = UUID.randomUUID().toString();
         this.gameHashes = new HashMap<>();
@@ -83,18 +83,18 @@ public class ServerType4 {
             return;
         }
 
-        ServerSecureMess response;
+        ServerAdvancedMess response;
         try {
             response = process(requestLine);
         } catch (IllegalArgumentException e) {
-            response = new ServerSecureMess(GameState.INVALID, "0", "0", "0");
+            response = new ServerAdvancedMess(GameState.INVALID, "0", "0", "0");
         }
         output.println(response.toProtocolMessage());
         System.out.println(response.toProtocolMessage());
     }
 
-    private ServerSecureMess process(String requestLine) {
-        ClientSecureMess request = ClientSecureMess.parse(requestLine);
+    private ServerAdvancedMess process(String requestLine) {
+        ClientAdvancedMess request = ClientAdvancedMess.parse(requestLine);
         System.out.println(request.toProtocolMessage());
 
         if (isStartGameRequest(request)) {
@@ -104,20 +104,20 @@ public class ServerType4 {
 
         String storedHash = gameHashes.get(request.gameId());
         if (storedHash == null) {
-            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), request.hashBoard(), request.gameId());
+            return new ServerAdvancedMess(GameState.INVALID, request.boardMessage(), request.hashBoard(), request.gameId());
         }
 
         // protect integrity and defend against replay attacks
         String requestBoardHash = hashBoard(request.boardMessage());
         if (!storedHash.equals(request.hashBoard()) || !storedHash.equals(requestBoardHash)) {
-            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), storedHash, request.gameId());
+            return new ServerAdvancedMess(GameState.INVALID, request.boardMessage(), storedHash, request.gameId());
         }
 
         Board2D board = new Board2D();
         try {
             board.updateBoard(request.boardMessage());
         } catch (IllegalArgumentException e) {
-            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), storedHash, request.gameId());
+            return new ServerAdvancedMess(GameState.INVALID, request.boardMessage(), storedHash, request.gameId());
         }
 
         Player human = new HumanPlayer(
@@ -157,27 +157,27 @@ public class ServerType4 {
         return responseFor(request.gameId(), GameState.CONT, board);
     }
 
-    private boolean isStartGameRequest(ClientSecureMess request) {
+    private boolean isStartGameRequest(ClientAdvancedMess request) {
         return START_GAME_MESSAGE.equals(request.toProtocolMessage());
     }
 
-    private ServerSecureMess createGame(Board2D board) {
+    private ServerAdvancedMess createGame(Board2D board) {
         String gameId = UUID.randomUUID().toString();
         return responseFor(gameId, GameState.CONT, board);
     }
 
-    private ServerSecureMess responseFor(String gameId, GameState state, Board2D board) {
+    private ServerAdvancedMess responseFor(String gameId, GameState state, Board2D board) {
         String boardMessage = board.toMessage();
         String hashBoard = hashBoard(boardMessage);
         gameHashes.put(gameId, hashBoard);
-        return new ServerSecureMess(state, boardMessage, hashBoard, gameId);
+        return new ServerAdvancedMess(state, boardMessage, hashBoard, gameId);
     }
 
-    private ServerSecureMess finishGame(String gameId, GameState state, Board2D board) {
+    private ServerAdvancedMess finishGame(String gameId, GameState state, Board2D board) {
         String boardMessage = board.toMessage();
         String hashBoard = hashBoard(boardMessage);
         gameHashes.remove(gameId);
-        return new ServerSecureMess(state, boardMessage, hashBoard, gameId);
+        return new ServerAdvancedMess(state, boardMessage, hashBoard, gameId);
     }
 
     private String hashBoard(String boardMessage) {
@@ -210,7 +210,7 @@ public class ServerType4 {
         }
 
         try {
-            new ServerType4(port).start();
+            new ServerType5(port).start();
         } catch (IOException e) {
             System.err.println("Failed to start Type 4 server: " + e.getMessage());
         }

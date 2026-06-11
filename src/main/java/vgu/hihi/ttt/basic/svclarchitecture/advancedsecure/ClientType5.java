@@ -1,4 +1,4 @@
-package vgu.hihi.ttt.basic.svclarchitecture.securestateless;
+package vgu.hihi.ttt.basic.svclarchitecture.advancedsecure;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,7 +35,7 @@ import vgu.hihi.ttt.basic.GameState;
  * 8- If status is WIN, DRAW, or QUIT, close.
  * 9- Otherwise continue.
  */
-public class ClientType4 {
+public class ClientType5 {
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1234;
 
@@ -46,11 +46,11 @@ public class ClientType4 {
     private String hashBoard;
     private String gameId;
 
-    public ClientType4() {
+    public ClientType5() {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }
 
-    public ClientType4(String host, int port) {
+    public ClientType5(String host, int port) {
         this.host = host;
         this.port = port;
         this.board = new Board2D();
@@ -62,7 +62,7 @@ public class ClientType4 {
         System.out.println("Connected mode: secure stateless TCP request/response");
 
         try {
-            ServerSecureMess response = sendMessage(new ClientSecureMess("0", "0", "0", "0"));
+            ServerAdvancedMess response = sendMessage(new ClientAdvancedMess("0", "0", "0", "0"));
             updateLocalState(response);
         } catch (IOException e) {
             System.err.println("Could not start game: " + e.getMessage());
@@ -89,7 +89,7 @@ public class ClientType4 {
             }
 
             try {
-                ServerSecureMess response = sendOneTurn(moveText);
+                ServerAdvancedMess response = sendOneTurn(moveText);
                 System.out.println(response.toProtocolMessage());
                 updateLocalState(response);
                 printResult(response.state());
@@ -106,11 +106,11 @@ public class ClientType4 {
         board.printBoard();
     }
 
-    private ServerSecureMess sendOneTurn(String moveText) throws IOException {
-        return sendMessage(new ClientSecureMess(moveText, board.toMessage(), hashBoard, gameId));
+    private ServerAdvancedMess sendOneTurn(String moveText) throws IOException {
+        return sendMessage(new ClientAdvancedMess(moveText, board.toMessage(), hashBoard, gameId));
     }
 
-    private ServerSecureMess sendMessage(ClientSecureMess request) throws IOException {
+    private ServerAdvancedMess sendMessage(ClientAdvancedMess request) throws IOException {
         try (Socket socket = new Socket(host, port);
              BufferedReader input = new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8)
@@ -124,11 +124,11 @@ public class ClientType4 {
                 throw new IOException("server closed the connection without a response");
             }
 
-            return ServerSecureMess.parse(responseLine);
+            return ServerAdvancedMess.parse(responseLine);
         }
     }
 
-    private void updateLocalState(ServerSecureMess response) {
+    private void updateLocalState(ServerAdvancedMess response) {
         if (!response.boardMessage().isBlank()) {
             board.updateBoard(response.boardMessage());
         }
@@ -166,7 +166,7 @@ public class ClientType4 {
             port = Integer.parseInt(args[1]);
         }
 
-        new ClientType4(host, port).start();
+        new ClientType5(host, port).start();
     }
 
 }
