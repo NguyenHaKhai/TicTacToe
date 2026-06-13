@@ -82,25 +82,6 @@ public class Board2D extends Board{
     // }
 
     @Override
-    public String printBoard(){
-        String result = "";
-        for (int i = 0; i < getSize(); i++) {
-            printer.print("| " + getCell(i) + " ");
-
-            // for the cl-sv type 1, 2
-            result += "| " + getCell(i) + " ";
-            if ((i + 1) % getCol() == 0) {
-                printer.print("|\n");
-
-                // for the cl-sv type 1, 2
-                result += "|\n";
-            }
-        }
-        // result += "\n";
-        return result;
-    }
-
-    @Override
     public int checkWinner3(){
         // check rows
         for (int r = 0; r < row; r++) {

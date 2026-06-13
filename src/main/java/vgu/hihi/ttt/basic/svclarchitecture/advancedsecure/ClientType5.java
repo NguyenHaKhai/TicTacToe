@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
-import vgu.hihi.ttt.basic.svclarchitecture.Constant;
+import vgu.hihi.ttt.basic.settings.Constant;
 // TODO rewrite the javadoc to review the code
 /**
  * Fat Client with more logic to handle the scalability issue.

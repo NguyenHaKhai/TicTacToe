@@ -1,4 +1,4 @@
-package vgu.hihi.ttt.basic.svclarchitecture;
+package vgu.hihi.ttt.basic.settings;
 
 public final class Constant {
     public static final String DEFAULT_HOST = "localhost";
@@ -8,6 +8,9 @@ public final class Constant {
 
     public static final int HUMAN_ID = 1;
     public static final int COMPUTER_ID = 2;
+    public static final String HUMAN_SYMBOL = "X";
+    public static final String COMPUTER_SYMBOL = "O";
+    public static final String EMPTY_SYMBOL = "-";
 
     private Constant() {
     }

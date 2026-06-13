@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import vgu.hihi.ttt.basic.settings.Constant;
+
 /**
  * CLIENT: Thin UI layer with NO game logic.
  * Responsibilities:

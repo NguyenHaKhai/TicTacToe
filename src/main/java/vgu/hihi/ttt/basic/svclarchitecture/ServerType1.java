@@ -11,6 +11,7 @@ import vgu.hihi.ttt.basic.ComputerPlayer;
 import vgu.hihi.ttt.basic.Game;
 import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
+import vgu.hihi.ttt.basic.settings.Constant;
 
 public class ServerType1 {
     private ServerSocket serverSocket;

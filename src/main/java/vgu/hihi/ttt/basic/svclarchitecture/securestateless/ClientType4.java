@@ -11,7 +11,7 @@ import java.util.Scanner;
 import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
-import vgu.hihi.ttt.basic.svclarchitecture.Constant;
+import vgu.hihi.ttt.basic.settings.Constant;
 // TODO rewrite the javadoc to review the code
 /**
  * Stateless secure client using a one-request-per-turn protocol.

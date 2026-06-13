@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
-import vgu.hihi.ttt.basic.svclarchitecture.Constant;
+import vgu.hihi.ttt.basic.settings.Constant;
 
 /**
  * Cheat Client who can make another board message(not the original one) and send to server

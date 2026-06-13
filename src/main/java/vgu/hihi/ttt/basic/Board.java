@@ -28,6 +28,24 @@ public abstract class Board {
         this.printer = printer;
     }
 
+    public String printBoard(){
+        String result = "";
+        for (int i = 0; i < getSize(); i++) {
+            printer.print("| " + getCell(i) + " ");
+
+            // for the cl-sv type 1, 2
+            result += "| " + getCell(i) + " ";
+            if ((i + 1) % getCol() == 0) {
+                printer.print("|\n");
+
+                // for the cl-sv type 1, 2
+                result += "|\n";
+            }
+        }
+        // result += "\n";
+        return result;
+    }
+
     public String toMessage(){ // to convert to message exchanged between cl & sv type 3
         String message = "";
         for(int i = 0; i < getSize(); i++){
@@ -58,8 +76,6 @@ public abstract class Board {
         }
     }
 
-
-    public abstract String printBoard();
     public abstract int checkWinner3();
     public abstract boolean isCellEmpty(int position);
     public abstract int getCell(int position);

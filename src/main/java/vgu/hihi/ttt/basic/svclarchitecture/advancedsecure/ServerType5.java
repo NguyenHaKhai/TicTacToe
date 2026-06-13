@@ -19,7 +19,7 @@ import vgu.hihi.ttt.basic.ComputerPlayer;
 import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
-import vgu.hihi.ttt.basic.svclarchitecture.Constant;
+import vgu.hihi.ttt.basic.settings.Constant;
 // TODO rewrite the javadoc to review the code
 /**
  * Stateless Server:
