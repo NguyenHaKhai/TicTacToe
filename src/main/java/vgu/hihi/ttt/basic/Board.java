@@ -24,6 +24,10 @@ public abstract class Board {
         return (position < 0 || position >= row * col);
     }
 
+    public PrintStream getPrinter() {
+        return printer;
+    }
+
     public void setPrinter(PrintStream printer) {
         this.printer = printer;
     }

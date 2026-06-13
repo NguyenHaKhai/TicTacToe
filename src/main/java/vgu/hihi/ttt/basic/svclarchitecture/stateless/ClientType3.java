@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
+import vgu.hihi.ttt.basic.BoardFormatter;
 import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.settings.Constant;
 
@@ -56,7 +57,7 @@ public class ClientType3 {
         boolean playing = true;
         while (playing) {
             System.out.println();
-            board.printBoard();
+            BoardFormatter.formatSymbols(board);
             System.out.print("Enter a move [1-" + board.getSize() + "] or q to quit: ");
 
             if (!scanner.hasNextLine()) {
@@ -84,7 +85,7 @@ public class ClientType3 {
             }
         }
         System.out.println();
-        board.printBoard();
+        BoardFormatter.formatSymbols(board);
     }
 
     private ServerDumbMess sendOneTurn(String moveText) throws IOException {
