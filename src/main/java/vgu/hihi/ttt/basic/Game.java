@@ -34,96 +34,65 @@ public class Game {
             if(turn == player1.getId()){
                 out.println("Player#" + player1.getId() + "'s turn");
                 moveMade = player1.makeMove(board); 
-                    // TODO: make enum
-                    if(moveMade == -3){
+                GameState currentState = GameLogic.applyMove(board, player1, moveMade);
+                switch(currentState){
+                    case GameState.END -> {
                         out.println("End of the game");
                         turn = 0;
                     }
-                    else if(moveMade == -2){
-                        out.println("The cell is occupied!");
+                    case GameState.OCCUPIED -> out.println("The cell is occupied!");
+                    case GameState.INVALID -> out.println("Please, input a valid number [1-9]");
+                    case GameState.WIN -> {
+                        board.printBoard();
+                        out.println("Player#" + player1.getId() + " won!");
+                        turn = 0;
                     }
-                    else if(moveMade != -1){
-                        board.setCell(moveMade, player1.getId());
+                    case GameState.DRAW -> {
+                        board.printBoard();
+                        out.println("It is a draw!");
+                        turn = 0;
+                    }
+                    case GameState.CONT -> {
+                        board.printBoard();
                         turn = player2.getId();
-                        progress();
                     }
-                    else out.println("Please, input a valid number [1-9]");
+                    default -> out.println("Something is not correct. Game state: " + currentState);
+                }
             }
             // here I tried to make it abstract, yet we have the fact that a computer dont
             // output Player#2 turn when it makes wrong move -> move the line into moveMade if
             else if(turn == player2.getId()){
                 moveMade = player2.makeMove(board);
-                    if(moveMade != -1){
-                        out.println("Player#" + player2.getId() + "'s turn");
-                        board.setCell(moveMade, player2.getId());
-                        turn = player1.getId();
-                        progress();
+                GameState currentState = GameLogic.applyMove(board, player2, moveMade);
+                switch(currentState){
+                    case GameState.INVALID -> {}
+                    case GameState.WIN -> {
+                        out.println("Player#" + player2.getId() + "'s turn"); // this is placed here because only prints this when computer makes the valid move
+                        board.printBoard();
+                        out.println("Player#" + player2.getId() + " won!");
+                        turn = 0;
                     }
+                    case GameState.DRAW -> {
+                        out.println("Player#" + player2.getId() + "'s turn"); // this is placed here because only prints this when computer makes the valid move
+                        board.printBoard();
+                        out.println("It is a draw!");
+                        turn = 0;
+                    }
+                    case GameState.CONT -> {
+                        out.println("Player#" + player2.getId() + "'s turn"); // this is placed here because only prints this when computer makes the valid move
+                        board.printBoard();
+                        turn = player1.getId();
+                    }
+                    default -> out.println("Something is not correct. Game state: " + currentState);
+                }
             }
             else{
                 out.println("Invalid int value: Check again!"); //optional, since handled at the start already
             }
-                
-            // case 3:
-            //     player22.makeMove(board);
-            //     break;
-
-            // // assume that turn goes in a cycle: 1 -> 2 -> 3 -> 1 -> 2 -> 3 -> 1 -> ...
-            // turn = ++turn > 3 ? 1 : turn;
-
-            // turn = (turn == 1) ? 2 : 1;
         }
         // });
         // gameThread.start();
         
             
-    }
-
-    private void progress(){
-        board.printBoard();
-        // out.println("");
-
-        int winner = board.checkWinner3();
-
-        if (winner == player1.getId()) {
-            out.println("Player#" + player1.getId() + " won!");
-            turn = 0;
-        } else if (winner == player2.getId()) {
-            out.println("Player#" + player2.getId() + " won!");
-            turn = 0;
-        } else if (board.isFull()) {
-            out.println("It is a draw!");
-            turn = 0;
-        }
-    }
-    // consider implement in the future when player1 is not human
-    private void humanPlay(){
-        int moveMade;
-        out.println("Player#" + player1.getId() + "'s turn");
-        moveMade = player1.makeMove(board);
-            if(moveMade == -3){
-                out.println("End of the game");
-                turn = 0;
-            }
-            else if(moveMade == -2){
-                out.println("The cell is occupied!");
-            }
-            else if(moveMade != -1){
-                board.setCell(moveMade, player1.getId());
-                turn = player2.getId();
-                progress();
-            }
-            else out.println("Please, input a valid number [1-9]");
-    }
-    // consider implement in the future when player2 is not computer
-    private void computerPlay(){
-        int moveMade;
-        moveMade = player2.makeMove(board);
-                    if(moveMade != -1){
-                        out.println("Player#" + player2.getId() + "'s turn");
-                        board.setCell(moveMade, player2.getId());
-                        turn = player1.getId();
-                        progress();
-                    }
     }
 }
