@@ -15,6 +15,7 @@ import java.util.UUID;
 import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.ComputerPlayer;
+import vgu.hihi.ttt.basic.GameLogic;
 import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
@@ -106,28 +107,18 @@ public class ServerType4 {
         Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
 
         int humanMove = human.makeMove(board);
-        GameState humanMoveState = mapHumanMoveState(humanMove);
+        GameState humanMoveState = GameLogic.applyMove(board, human, humanMove);
         if (humanMoveState != GameState.CONT) {
             return responseFor(humanMoveState, board);
-        }
-
-        board.setCell(humanMove, human.getId());
-        if (board.checkWinner3() == human.getId()) {
-            return responseFor(GameState.WIN, board);
-        }
-        if (board.isFull()) {
-            return responseFor(GameState.DRAW, board);
         }
 
         int computerMove = computer.makeMove(board);
         while(computerMove == -1) computerMove = computer.makeMove(board); // attempt until find a valid move
 
-        board.setCell(computerMove, computer.getId());
-        if (board.checkWinner3() == computer.getId()) {
-            return responseFor(GameState.LOST, board);
-        }
-        if (board.isFull()) {
-            return responseFor(GameState.DRAW, board);
+        GameState compMoveState = GameLogic.applyMove(board, computer, computerMove);
+        switch(compMoveState){
+            case GameState.WIN -> {return responseFor(GameState.LOST, board);} // send lost message to client
+            case GameState.DRAW -> {return responseFor(GameState.DRAW, board);}
         }
 
         return responseFor(GameState.CONT, board);
@@ -167,15 +158,6 @@ public class ServerType4 {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 is not available", e);
         }
-    }
-
-    private GameState mapHumanMoveState(int move) {
-        return switch (move) {
-            case -3 -> GameState.END;
-            case -2 -> GameState.OCCUPIED;
-            case -1 -> GameState.INVALID;
-            default -> GameState.CONT;
-        };
     }
 
     public static void main(String[] args) {
