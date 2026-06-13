@@ -21,9 +21,6 @@ import java.net.Socket;
  * - AI/Computer player logic
  */
 public class Client {
-    private static final String SERVER_HOST = "localhost";
-    private static final int SERVER_PORT = 1234;
-
     private Socket socket;
     private PrintWriter serverOut;
     private BufferedReader serverIn;
@@ -31,8 +28,8 @@ public class Client {
 
     public Client() throws IOException {
         // Connect to server
-        socket = new Socket(SERVER_HOST, SERVER_PORT);
-        System.out.println("✅ Connected to server at " + SERVER_HOST + ":" + SERVER_PORT);
+        socket = new Socket(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT);
+        System.out.println("✅ Connected to server at " + Constant.DEFAULT_HOST + ":" + Constant.DEFAULT_PORT);
 
         // Setup I/O streams
         serverOut = new PrintWriter(socket.getOutputStream(), true);

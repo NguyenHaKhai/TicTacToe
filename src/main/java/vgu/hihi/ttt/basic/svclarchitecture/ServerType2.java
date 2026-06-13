@@ -15,20 +15,17 @@ import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
 
 public class ServerType2 {
-    private static final int PORT = 1234;
-    private static final int THREAD_POOL_SIZE = 4;
-
 
     private ServerSocket serverSocket;
     private ExecutorService threadPool;
 
 
     public ServerType2() throws IOException {
-        serverSocket = new ServerSocket(PORT);
-        threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        serverSocket = new ServerSocket(Constant.DEFAULT_PORT);
+        threadPool = Executors.newFixedThreadPool(Constant.THREAD_POOL_SIZE);
 
-        System.out.println("Server type 2 started on port " + PORT);
-        System.out.println("Thread pool size: " + THREAD_POOL_SIZE);
+        System.out.println("Server type 2 started on port " + Constant.DEFAULT_PORT);
+        System.out.println("Thread pool size: " + Constant.THREAD_POOL_SIZE);
         System.out.println("Waiting for client connection...");
     }
 
@@ -98,8 +95,8 @@ public class ServerType2 {
         board.printBoard();
 
 
-        Player human = new HumanPlayer(1, clientSocket.getInputStream());
-        Player computer = new ComputerPlayer(2);
+        Player human = new HumanPlayer(Constant.HUMAN_ID, clientSocket.getInputStream());
+        Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
 
         Game game = new Game(board, human, computer, startTurn, clientOut);
         game.play();

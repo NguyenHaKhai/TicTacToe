@@ -9,28 +9,26 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
+import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.ComputerPlayer;
 import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
+import vgu.hihi.ttt.basic.svclarchitecture.Constant;
 
 /**
  * Stateless server using a one-request-per-turn protocol.
- * The client starts with "0|0", then the server creates and returns the
+ * The client starts with "START|[who moves first]", then the server creates and returns the
  * official initial board. Later requests send "move|board".
  * START|1 for human to start
  * START|2 for computer to start
  */
 public class ServerType3 {
-    private static final int DEFAULT_PORT = 1234;
-    private static final int HUMAN_ID = 1;
-    private static final int COMPUTER_ID = 2;
-
     private final int port;
 
     public ServerType3() {
-        this(DEFAULT_PORT);
+        this(Constant.DEFAULT_PORT);
     }
 
     public ServerType3(int port) {
@@ -79,7 +77,7 @@ public class ServerType3 {
 
         if (isStartGameRequest(request)) {
             String turnStart = request.boardMessage();
-            Board2D newBoard = new Board2D();
+            Board newBoard = new Board2D();
             return createGame(newBoard, turnStart);
         }
 
@@ -91,10 +89,10 @@ public class ServerType3 {
         }
 
         Player human = new HumanPlayer(
-            HUMAN_ID,
+            Constant.HUMAN_ID,
             new ByteArrayInputStream((request.moveText() + "\n").getBytes(StandardCharsets.UTF_8))
         );
-        Player computer = new ComputerPlayer(COMPUTER_ID);
+        Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
 
         int humanMove = human.makeMove(board);
         GameState humanMoveState = mapHumanMoveState(humanMove);
@@ -130,9 +128,9 @@ public class ServerType3 {
         return "START".equals(request.moveText());
     }
 
-    private ServerDumbMess createGame(Board2D board, String turnStart) {
-        if(turnStart.equals("2")) { // computer moves first
-            Player computer = new ComputerPlayer(COMPUTER_ID);
+    private ServerDumbMess createGame(Board board, String turnStart) {
+        if(turnStart.equals(String.valueOf(Constant.COMPUTER_ID))) { // computer moves first
+            Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
             int computerMove = computer.makeMove(board);
             while (computerMove == -1) {
                 computerMove = computer.makeMove(board); // attempt to find 1 valid move for computer
@@ -142,7 +140,7 @@ public class ServerType3 {
         return responseFor(GameState.CONT, board);
     }
 
-    private ServerDumbMess responseFor(GameState state, Board2D board) {
+    private ServerDumbMess responseFor(GameState state, Board board) {
         String boardMessage = board.toMessage();
         return new ServerDumbMess(state, boardMessage);
     }
@@ -157,7 +155,7 @@ public class ServerType3 {
     }
 
     public static void main(String[] args) {
-        int port = DEFAULT_PORT;
+        int port = Constant.DEFAULT_PORT;
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         }

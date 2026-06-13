@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
+import vgu.hihi.ttt.basic.svclarchitecture.Constant;
 // TODO rewrite the javadoc to review the code
 /**
  * Fat Client with more logic to handle the scalability issue.
@@ -36,9 +37,6 @@ import vgu.hihi.ttt.basic.GameState;
  * 9- Otherwise continue.
  */
 public class ClientType5 {
-    private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_PORT = 1234;
-
     private final String host;
     private final int port;
     private final Board2D board;
@@ -47,7 +45,7 @@ public class ClientType5 {
     private String gameId;
 
     public ClientType5() {
-        this(DEFAULT_HOST, DEFAULT_PORT);
+        this(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT);
     }
 
     public ClientType5(String host, int port) {
@@ -156,8 +154,8 @@ public class ClientType5 {
     }
 
     public static void main(String[] args) {
-        String host = DEFAULT_HOST;
-        int port = DEFAULT_PORT;
+        String host = Constant.DEFAULT_HOST;
+        int port = Constant.DEFAULT_PORT;
 
         if (args.length > 0) {
             host = args[0];

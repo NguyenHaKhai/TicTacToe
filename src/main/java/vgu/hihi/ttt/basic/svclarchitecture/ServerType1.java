@@ -13,13 +13,11 @@ import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
 
 public class ServerType1 {
-    private static final int PORT = 1234;
-
     private ServerSocket serverSocket;
 
     public ServerType1() throws IOException {
-        serverSocket = new ServerSocket(PORT);
-        System.out.println("Server started on port " + PORT);
+        serverSocket = new ServerSocket(Constant.DEFAULT_PORT);
+        System.out.println("Server started on port " + Constant.DEFAULT_PORT);
         System.out.println("Waiting for client connection...");
     }
 
@@ -76,8 +74,8 @@ public class ServerType1 {
         board.printBoard();
 
 
-        Player human = new HumanPlayer(1, clientSocket.getInputStream());
-        Player computer = new ComputerPlayer(2);
+        Player human = new HumanPlayer(Constant.HUMAN_ID, clientSocket.getInputStream());
+        Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
 
         Game game = new Game(board, human, computer, startTurn, clientOut);
         game.play();

@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
+import vgu.hihi.ttt.basic.svclarchitecture.Constant;
 
 /**
  * Stateless client using a one-request-per-turn protocol.
@@ -18,10 +19,6 @@ import vgu.hihi.ttt.basic.GameState;
  * START|2 for computer to start
  */
 public class ClientType3 {
-    private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_PORT = 1234;
-    private static final String DEFAULT_START = "1";
-
     private final String host;
     private final int port;
     private final String turnStart;
@@ -29,7 +26,7 @@ public class ClientType3 {
     private final Scanner scanner;
 
     public ClientType3() {
-        this(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_START);
+        this(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT, Constant.DEFAULT_START);
     }
 
     public ClientType3(String host, int port, String turnStart) {
@@ -137,13 +134,14 @@ public class ClientType3 {
     }
 
     public static void main(String[] args) {
-        String turnStart = DEFAULT_START;
-        String host = DEFAULT_HOST;
-        int port = DEFAULT_PORT;
+        String turnStart = Constant.DEFAULT_START;
+        String host = Constant.DEFAULT_HOST;
+        int port = Constant.DEFAULT_PORT;
 
         if (args.length > 0) {
             turnStart = args[0];
-            if(!turnStart.equals("1") || turnStart.equals("2")){
+            if(!turnStart.equals(String.valueOf(Constant.HUMAN_ID))
+                && !turnStart.equals(String.valueOf(Constant.COMPUTER_ID))){
                 System.out.println("Usage: 1 for human first, 2 for computer first");
                 return;
             }

@@ -10,51 +10,34 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
+import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.ComputerPlayer;
 import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
+import vgu.hihi.ttt.basic.svclarchitecture.Constant;
 // TODO rewrite the javadoc to review the code
 /**
- * Stateless Server:
- * 1. Accept client connection and first start message.
- * 2. Read one request line.
- * 3. Parse move and board state.
- * 4. Reconstruct Board2D from the board state.
- * 5. Validate:
- *  - move is number
- *  - move is in range
- *  - target cell is empty
- *  - board shape is valid
- * 6. Apply human move.
- * 7. Check winner/draw/quit.
- * 8. If game continues, apply computer move.
- * 9. Check winner/draw again.
- * 10. Send structured response with official updated board.
+ * Stateless secure server using a one-request-per-turn protocol.
+ * The client starts with "START|[who moves first]|0", then the server creates and returns the
+ * official initial board. Later requests send "move|board".
+ * START|1|0 for human to start
+ * START|2|0 for computer to start
  */
 public class ServerType4 {
-    private static final int DEFAULT_PORT = 1234;
-    private static final int HUMAN_ID = 1;
-    private static final int COMPUTER_ID = 2;
-    private static final String START_GAME_MESSAGE = "0|0|0|0";
-
     private final int port;
     private final String secretKey;
-    private final Map<String, String> gameHashes;
 
     public ServerType4() {
-        this(DEFAULT_PORT);
+        this(Constant.DEFAULT_PORT);
     }
 
     public ServerType4(int port) {
         this.port = port;
         this.secretKey = UUID.randomUUID().toString();
-        this.gameHashes = new HashMap<>();
     }
 
     public void start() throws IOException {
@@ -87,7 +70,7 @@ public class ServerType4 {
         try {
             response = process(requestLine);
         } catch (IllegalArgumentException e) {
-            response = new ServerSecureMess(GameState.INVALID, "0", "0", "0");
+            response = new ServerSecureMess(GameState.INVALID, "0", "0");
         }
         output.println(response.toProtocolMessage());
         System.out.println(response.toProtocolMessage());
@@ -98,49 +81,42 @@ public class ServerType4 {
         System.out.println(request.toProtocolMessage());
 
         if (isStartGameRequest(request)) {
-            Board2D newBoard = new Board2D();
-            return createGame(newBoard);
+            String turnStart = request.boardMessage();
+            Board newBoard = new Board2D();
+            return createGame(newBoard, turnStart);
         }
 
-        String storedHash = gameHashes.get(request.gameId());
-        if (storedHash == null) {
-            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), request.hashBoard(), request.gameId());
-        }
-
-        // protect integrity and defend against replay attacks
+        // Protect board integrity. Replay protection can be added by the game-id based protocol.
         String requestBoardHash = hashBoard(request.boardMessage());
-        if (!storedHash.equals(request.hashBoard()) || !storedHash.equals(requestBoardHash)) {
-            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), storedHash, request.gameId());
+        if (!request.hashBoard().equals(requestBoardHash)) {
+            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), requestBoardHash);
         }
 
         Board2D board = new Board2D();
         try {
             board.updateBoard(request.boardMessage());
         } catch (IllegalArgumentException e) {
-            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), storedHash, request.gameId());
+            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), requestBoardHash);
         }
 
         Player human = new HumanPlayer(
-            HUMAN_ID,
+            Constant.HUMAN_ID,
             new ByteArrayInputStream((request.moveText() + "\n").getBytes(StandardCharsets.UTF_8))
         );
-        Player computer = new ComputerPlayer(COMPUTER_ID);
+        Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
 
         int humanMove = human.makeMove(board);
         GameState humanMoveState = mapHumanMoveState(humanMove);
         if (humanMoveState != GameState.CONT) {
-            if (humanMoveState == GameState.END) {
-                return finishGame(request.gameId(), humanMoveState, board);
-            }
-            return responseFor(request.gameId(), humanMoveState, board);
+            return responseFor(humanMoveState, board);
         }
 
         board.setCell(humanMove, human.getId());
         if (board.checkWinner3() == human.getId()) {
-            return finishGame(request.gameId(), GameState.WIN, board);
+            return responseFor(GameState.WIN, board);
         }
         if (board.isFull()) {
-            return finishGame(request.gameId(), GameState.DRAW, board);
+            return responseFor(GameState.DRAW, board);
         }
 
         int computerMove = computer.makeMove(board);
@@ -148,36 +124,35 @@ public class ServerType4 {
 
         board.setCell(computerMove, computer.getId());
         if (board.checkWinner3() == computer.getId()) {
-            return finishGame(request.gameId(), GameState.LOST, board);
+            return responseFor(GameState.LOST, board);
         }
         if (board.isFull()) {
-            return finishGame(request.gameId(), GameState.DRAW, board);
+            return responseFor(GameState.DRAW, board);
         }
 
-        return responseFor(request.gameId(), GameState.CONT, board);
+        return responseFor(GameState.CONT, board);
     }
 
     private boolean isStartGameRequest(ClientSecureMess request) {
-        return START_GAME_MESSAGE.equals(request.toProtocolMessage());
+        return "START".equals(request.moveText());
     }
 
-    private ServerSecureMess createGame(Board2D board) {
-        String gameId = UUID.randomUUID().toString();
-        return responseFor(gameId, GameState.CONT, board);
+    private ServerSecureMess createGame(Board board, String turnStart) {
+        if(turnStart.equals(String.valueOf(Constant.COMPUTER_ID))) { // computer moves first
+            Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
+            int computerMove = computer.makeMove(board);
+            while (computerMove == -1) {
+                computerMove = computer.makeMove(board); // attempt to find 1 valid move for computer
+            }
+            board.setCell(computerMove, computer.getId()); 
+        }
+        return responseFor(GameState.CONT, board);
     }
 
-    private ServerSecureMess responseFor(String gameId, GameState state, Board2D board) {
+    private ServerSecureMess responseFor(GameState state, Board board) {
         String boardMessage = board.toMessage();
         String hashBoard = hashBoard(boardMessage);
-        gameHashes.put(gameId, hashBoard);
-        return new ServerSecureMess(state, boardMessage, hashBoard, gameId);
-    }
-
-    private ServerSecureMess finishGame(String gameId, GameState state, Board2D board) {
-        String boardMessage = board.toMessage();
-        String hashBoard = hashBoard(boardMessage);
-        gameHashes.remove(gameId);
-        return new ServerSecureMess(state, boardMessage, hashBoard, gameId);
+        return new ServerSecureMess(state, boardMessage, hashBoard);
     }
 
     private String hashBoard(String boardMessage) {
@@ -204,7 +179,7 @@ public class ServerType4 {
     }
 
     public static void main(String[] args) {
-        int port = DEFAULT_PORT;
+        int port = Constant.DEFAULT_PORT;
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         }

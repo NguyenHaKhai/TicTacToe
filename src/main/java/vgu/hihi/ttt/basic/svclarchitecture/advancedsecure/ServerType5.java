@@ -19,6 +19,7 @@ import vgu.hihi.ttt.basic.ComputerPlayer;
 import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
+import vgu.hihi.ttt.basic.svclarchitecture.Constant;
 // TODO rewrite the javadoc to review the code
 /**
  * Stateless Server:
@@ -38,9 +39,6 @@ import vgu.hihi.ttt.basic.Player;
  * 10. Send structured response with official updated board.
  */
 public class ServerType5 {
-    private static final int DEFAULT_PORT = 1234;
-    private static final int HUMAN_ID = 1;
-    private static final int COMPUTER_ID = 2;
     private static final String START_GAME_MESSAGE = "0|0|0|0";
 
     private final int port;
@@ -48,7 +46,7 @@ public class ServerType5 {
     private final Map<String, String> gameHashes;
 
     public ServerType5() {
-        this(DEFAULT_PORT);
+        this(Constant.DEFAULT_PORT);
     }
 
     public ServerType5(int port) {
@@ -121,10 +119,10 @@ public class ServerType5 {
         }
 
         Player human = new HumanPlayer(
-            HUMAN_ID,
+            Constant.HUMAN_ID,
             new ByteArrayInputStream((request.moveText() + "\n").getBytes(StandardCharsets.UTF_8))
         );
-        Player computer = new ComputerPlayer(COMPUTER_ID);
+        Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
 
         int humanMove = human.makeMove(board);
         GameState humanMoveState = mapHumanMoveState(humanMove);
@@ -204,7 +202,7 @@ public class ServerType5 {
     }
 
     public static void main(String[] args) {
-        int port = DEFAULT_PORT;
+        int port = Constant.DEFAULT_PORT;
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         }

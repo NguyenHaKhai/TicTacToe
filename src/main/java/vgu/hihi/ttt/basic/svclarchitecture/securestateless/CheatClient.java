@@ -10,49 +10,27 @@ import java.util.Scanner;
 
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
+import vgu.hihi.ttt.basic.svclarchitecture.Constant;
 
 /**
- * Fat Client with more logic to handle the scalability issue.
- 1. Initialize empty local board.
-2. Print local board.
-3. Ask user for move.
-4. Send move + current board to server.
-5. Receive structured response.
-6. Replace local board with board returned by server.
-7. Print message/result.
-8. If status is WIN, DRAW, or QUIT, close.
-9. Otherwise continue.
- */
-/**
- * Fat client.
- * 1- Initialize empty local board.
- * 2- Print local board.
- * 3- Ask user for move.
- * 4- Send move + current board to server.
- * 5- Receive structured repsonse.
- * 6- Replace local board with board returned by server.
- * 7- Print message/result
- * 8- If status is WIN, DRAW, or QUIT, close.
- * 9- Otherwise continue.
+ * Cheat Client who can make another board message(not the original one) and send to server
  */
 public class CheatClient {
-    private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_PORT = 1234;
-
     private final String host;
     private final int port;
+    private final String turnStart;
     private final Board2D board;
     private final Scanner scanner;
     private String hashBoard;
-    private String gameId;
 
     public CheatClient() {
-        this(DEFAULT_HOST, DEFAULT_PORT);
+        this(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT, Constant.DEFAULT_START);
     }
 
-    public CheatClient(String host, int port) {
+    public CheatClient(String host, int port, String turnStart) {
         this.host = host;
         this.port = port;
+        this.turnStart = turnStart;
         this.board = new Board2D();
         this.scanner = new Scanner(System.in);
     }
@@ -62,7 +40,7 @@ public class CheatClient {
         System.out.println("Connected mode: secure stateless TCP request/response");
 
         try {
-            ServerSecureMess response = sendMessage(new ClientSecureMess("0", "0", "0", "0"));
+            ServerSecureMess response = sendMessage(new ClientSecureMess("START", turnStart, "0"));
             updateLocalState(response);
         } catch (IOException e) {
             System.err.println("Could not start game: " + e.getMessage());
@@ -110,8 +88,8 @@ public class CheatClient {
     }
 
     private ServerSecureMess sendOneTurn(String moveText, String boardMess) throws IOException {
-        if(boardMess.isEmpty()) return sendMessage(new ClientSecureMess(moveText, board.toMessage(), hashBoard, gameId));
-        else return sendMessage(new ClientSecureMess(moveText, boardMess, hashBoard, gameId));
+        if(boardMess.isEmpty()) return sendMessage(new ClientSecureMess(moveText, board.toMessage(), hashBoard));
+        else return sendMessage(new ClientSecureMess(moveText, boardMess, hashBoard));
     }
 
     private ServerSecureMess sendMessage(ClientSecureMess request) throws IOException {
@@ -137,7 +115,6 @@ public class CheatClient {
             board.updateBoard(response.boardMessage());
         }
         hashBoard = response.hashBoard();
-        gameId = response.gameId();
     }
 
     private void printResult(GameState state) {
@@ -160,17 +137,21 @@ public class CheatClient {
     }
 
     public static void main(String[] args) {
-        String host = DEFAULT_HOST;
-        int port = DEFAULT_PORT;
+        String host = Constant.DEFAULT_HOST;
+        int port = Constant.DEFAULT_PORT;
+        String turnStart = Constant.DEFAULT_START;
 
         if (args.length > 0) {
-            host = args[0];
+            turnStart = args[0];
         }
         if (args.length > 1) {
-            port = Integer.parseInt(args[1]);
+            host = args[1];
+        }
+        if (args.length > 2) {
+            port = Integer.parseInt(args[2]);
         }
 
-        new CheatClient(host, port).start();
+        new CheatClient(host, port, turnStart).start();
     }
 
 }

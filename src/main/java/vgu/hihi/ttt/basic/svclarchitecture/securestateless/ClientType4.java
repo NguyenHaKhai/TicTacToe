@@ -10,49 +10,32 @@ import java.util.Scanner;
 
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
+import vgu.hihi.ttt.basic.svclarchitecture.Constant;
 // TODO rewrite the javadoc to review the code
 /**
- * Fat Client with more logic to handle the scalability issue.
- 1. Initialize empty local board.
-2. Print local board.
-3. Ask user for move.
-4. Send move + current board to server.
-5. Receive structured response.
-6. Replace local board with board returned by server.
-7. Print message/result.
-8. If status is WIN, DRAW, or QUIT, close.
-9. Otherwise continue.
- */
-/**
- * Fat client.
- * 1- Initialize empty local board.
- * 2- Print local board.
- * 3- Ask user for move.
- * 4- Send move + current board to server.
- * 5- Receive structured repsonse.
- * 6- Replace local board with board returned by server.
- * 7- Print message/result
- * 8- If status is WIN, DRAW, or QUIT, close.
- * 9- Otherwise continue.
+ * Stateless secure client using a one-request-per-turn protocol.
+ * The server sends the official initial board after the start request.
+ * Note that each message includes a hash so that attackers may change the contents of initial board
+ * START|1|0 for human to start
+ * START|2|0 for computer to start
+ * Note that "|0" at the end is used to parsed correctly with the normal move request message
  */
 public class ClientType4 {
-    private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_PORT = 1234;
-
     private final String host;
     private final int port;
+    private final String turnStart;
     private final Board2D board;
     private final Scanner scanner;
     private String hashBoard;
-    private String gameId;
 
     public ClientType4() {
-        this(DEFAULT_HOST, DEFAULT_PORT);
+        this(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT, Constant.DEFAULT_START);
     }
 
-    public ClientType4(String host, int port) {
+    public ClientType4(String host, int port, String turnStart) {
         this.host = host;
         this.port = port;
+        this.turnStart = turnStart;
         this.board = new Board2D();
         this.scanner = new Scanner(System.in);
     }
@@ -62,7 +45,7 @@ public class ClientType4 {
         System.out.println("Connected mode: secure stateless TCP request/response");
 
         try {
-            ServerSecureMess response = sendMessage(new ClientSecureMess("0", "0", "0", "0"));
+            ServerSecureMess response = sendMessage(new ClientSecureMess("START", turnStart, "0"));
             updateLocalState(response);
         } catch (IOException e) {
             System.err.println("Could not start game: " + e.getMessage());
@@ -107,7 +90,7 @@ public class ClientType4 {
     }
 
     private ServerSecureMess sendOneTurn(String moveText) throws IOException {
-        return sendMessage(new ClientSecureMess(moveText, board.toMessage(), hashBoard, gameId));
+        return sendMessage(new ClientSecureMess(moveText, board.toMessage(), hashBoard));
     }
 
     private ServerSecureMess sendMessage(ClientSecureMess request) throws IOException {
@@ -133,7 +116,6 @@ public class ClientType4 {
             board.updateBoard(response.boardMessage());
         }
         hashBoard = response.hashBoard();
-        gameId = response.gameId();
     }
 
     private void printResult(GameState state) {
@@ -156,17 +138,21 @@ public class ClientType4 {
     }
 
     public static void main(String[] args) {
-        String host = DEFAULT_HOST;
-        int port = DEFAULT_PORT;
+        String host = Constant.DEFAULT_HOST;
+        int port = Constant.DEFAULT_PORT;
+        String turnStart = Constant.DEFAULT_START;
 
         if (args.length > 0) {
-            host = args[0];
+            turnStart = args[0];
         }
         if (args.length > 1) {
-            port = Integer.parseInt(args[1]);
+            host = args[1];
+        }
+        if (args.length > 2){
+            port = Integer.parseInt(args[2]);
         }
 
-        new ClientType4(host, port).start();
+        new ClientType4(host, port, turnStart).start();
     }
 
 }
