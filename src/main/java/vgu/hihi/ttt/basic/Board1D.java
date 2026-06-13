@@ -183,31 +183,6 @@ public class Board1D extends Board{
         }
         return true;
     }
-    @Override
-    public String toMessage() {
-        String message = "";
-        for(int x : status){
-            message += x + " ";
-        }
-        return message.trim(); // trim the last white space
-    }
-    @Override
-    public void updateBoard(String messBoard) {
-        // task: parse the message string of the board to update status[]
-        String[] cells = messBoard.split(" ");
-        for(int i = 0; i < getSize(); i++){
-            setCell(i, Integer.parseInt(cells[i]));
-        }
-    }
-
-    // // copy board for testing
-    // public void copyBoard(int[] statusContents){
-    //     if(this.getSize() != statusContents.length){
-    //         System.out.println("Incompatible Size");
-    //         return;
-    //     }
-    //     System.arraycopy(statusContents, 0, status, 0, this.getSize());
-    // }
 
 }
 

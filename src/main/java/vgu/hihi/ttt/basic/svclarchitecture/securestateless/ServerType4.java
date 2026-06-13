@@ -92,7 +92,7 @@ public class ServerType4 {
             return new ServerSecureMess(GameState.INVALID, request.boardMessage(), requestBoardHash);
         }
 
-        Board2D board = new Board2D();
+        Board board = new Board2D();
         try {
             board.updateBoard(request.boardMessage());
         } catch (IllegalArgumentException e) {

@@ -28,6 +28,36 @@ public abstract class Board {
         this.printer = printer;
     }
 
+    public String toMessage(){ // to convert to message exchanged between cl & sv type 3
+        String message = "";
+        for(int i = 0; i < getSize(); i++){
+            message += getCell(i) + " ";
+        }
+        return message.trim(); // trim the last white space
+    }
+
+    public void updateBoard(String messBoard){ // use for update the board according to the message in sv-cl
+        // task: parse the message string of the board to update status
+        if (messBoard == null) {
+            throw new IllegalArgumentException("Board message must not be null");
+        }
+
+        String[] cells = messBoard.trim().split("\\s+");
+        if (cells.length != getSize()) {
+            throw new IllegalArgumentException(
+                "Expected " + getSize() + " board cells, received " + cells.length
+            );
+        }
+
+        for(int i = 0; i < getSize(); i++){
+            int cellValue = Integer.parseInt(cells[i]);
+            if (cellValue < 0 || cellValue > 2) {
+                throw new IllegalArgumentException("Unsupported board cell value: " + cellValue);
+            }
+            setCell(i, cellValue);
+        }
+    }
+
 
     public abstract String printBoard();
     public abstract int checkWinner3();
@@ -35,7 +65,5 @@ public abstract class Board {
     public abstract int getCell(int position);
     public abstract void setCell(int position, int playerId);
     public abstract boolean isFull();
-    public abstract String toMessage(); // to convert to message exchanged between cl & sv type 3
-    public abstract void updateBoard(String messBoard);
 }
 

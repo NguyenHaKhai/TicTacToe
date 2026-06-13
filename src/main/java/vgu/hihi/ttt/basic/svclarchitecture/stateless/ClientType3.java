@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
+import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.svclarchitecture.Constant;
@@ -22,7 +23,7 @@ public class ClientType3 {
     private final String host;
     private final int port;
     private final String turnStart;
-    private final Board2D board;
+    private final Board board;
     private final Scanner scanner;
 
     public ClientType3() {

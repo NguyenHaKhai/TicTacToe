@@ -81,7 +81,7 @@ public class ServerType3 {
             return createGame(newBoard, turnStart);
         }
 
-        Board2D board = new Board2D();
+        Board board = new Board2D();
         try {
             board.updateBoard(request.boardMessage());
         } catch (IllegalArgumentException e) {
