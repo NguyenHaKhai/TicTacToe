@@ -15,7 +15,7 @@ import vgu.hihi.ttt.basic.settings.Constant;
 /**
  * Client that needs to send more things. It is hard to commit replay attacks now
  */
-public class ClientType5 {
+public class ReplayCheatClient {
     private final String host;
     private final int port;
     private final String turnStart;
@@ -25,11 +25,11 @@ public class ClientType5 {
     private String nonce;
     private long creationTime;
 
-    public ClientType5() {
+    public ReplayCheatClient() {
         this(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT, Constant.DEFAULT_START);
     }
 
-    public ClientType5(String host, int port, String turnStart) {
+    public ReplayCheatClient(String host, int port, String turnStart) {
         this.host = host;
         this.port = port;
         this.turnStart = turnStart;
@@ -56,20 +56,20 @@ public class ClientType5 {
         while (playing) {
             System.out.println();
             board.printBoard();
-            System.out.print("Enter a move [1-" + board.getSize() + "] or q to quit: ");
+            System.out.print("Enter a ClientAdvancedMessage to cheat: ");
 
             if (!scanner.hasNextLine()) {
                 return;
             }
 
-            String moveText = scanner.nextLine().trim();
-            if (moveText.isEmpty()) {
-                System.out.println("Please enter a move.");
+            String designMess = scanner.nextLine().trim();
+            if (designMess.isEmpty()) {
+                System.out.println("Please enter a whole client message to cheat.");
                 continue;
             }
 
             try {
-                ServerAdvancedMess response = sendOneTurn(moveText);
+                ServerAdvancedMess response = sendReplayMessage(designMess);
                 System.out.println(response.toProtocolMessage());
                 updateLocalState(response);
                 printResult(response.state());
@@ -86,8 +86,8 @@ public class ClientType5 {
         board.printBoard();
     }
 
-    private ServerAdvancedMess sendOneTurn(String moveText) throws IOException {
-        return sendMessage(new ClientAdvancedMess(moveText, nonce, creationTime, board.toMessage(), hash));
+    private ServerAdvancedMess sendReplayMessage(String designMess) throws IOException {
+        return sendMessage(ClientAdvancedMess.parse(designMess));
     }
 
     private ServerAdvancedMess sendMessage(ClientAdvancedMess request) throws IOException {
@@ -155,7 +155,7 @@ public class ClientType5 {
             port = Integer.parseInt(args[2]);
         }
 
-        new ClientType5(host, port, turnStart).start();
+        new ReplayCheatClient(host, port, turnStart).start();
     }
 
 }

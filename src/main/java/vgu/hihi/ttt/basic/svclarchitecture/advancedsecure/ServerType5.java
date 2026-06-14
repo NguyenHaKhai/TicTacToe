@@ -97,6 +97,7 @@ public class ServerType5 {
             try {
                 response = process(requestLine);
             } catch (IllegalArgumentException e) {
+                System.out.println("Failed to process server repsonse?");
                 response = new ServerAdvancedMess(GameState.INVALID, "0", 0L, "0", "0");
             }
 
@@ -112,24 +113,32 @@ public class ServerType5 {
         System.out.println(request.toProtocolMessage());
 
         if (isStartGameRequest(request)) {
-            String turnStart = request.boardMessage();
+            String turnStart = request.nonce();
             Board newBoard = new Board2D();
             return createGame(newBoard, turnStart);
         }
 
         String expectedHash = hmac(request.boardMessage(), request.nonce(), request.creationTime());
-        if (MessageDigest.isEqual(expectedHash.getBytes(StandardCharsets.UTF_8), request.hash().getBytes(StandardCharsets.UTF_8))){
-            return invalidResponse(request);
+        if (!MessageDigest.isEqual(expectedHash.getBytes(StandardCharsets.UTF_8), request.hash().getBytes(StandardCharsets.UTF_8))){
+            System.out.println("Wrong hash?");
+            return new ServerAdvancedMess(GameState.INVALID, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
         }
 
         long now = System.currentTimeMillis();
         long expirationTime = request.creationTime() + Constant.TOKEN_TTL.toMillis();
         if (now > expirationTime) {
-            return invalidResponse(request);
+            // Calculate exactly how many milliseconds past the deadline the request arrived
+            long msOverdue = now - expirationTime;
+            long totalTimeTakenMs = now - request.creationTime();
+            
+            // Log it to your server console
+            System.out.printf("[TIMEOUT] Move rejected. Total time taken: %,d ms (Max allowed: %,d ms). Overdue by: %,d ms.%n", 
+                            totalTimeTakenMs, Constant.TOKEN_TTL.toMillis(), msOverdue);
+            return new ServerAdvancedMess(GameState.TIMEOUT, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
         }
 
         if (!consumedNonces.add(request.nonce())) {
-            return invalidResponse(request);
+            return new ServerAdvancedMess(GameState.REPLAY, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
         }
         expirationEntries.add(new ExpirationEntry(expirationTime, request.nonce()));
 
@@ -137,7 +146,7 @@ public class ServerType5 {
         try {
             board.updateBoard(request.boardMessage());
         } catch (IllegalArgumentException e) {
-            return invalidResponse(request);
+            return new ServerAdvancedMess(GameState.INVALID, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
         }
 
         return processTurn(request.moveText(), board);
@@ -208,10 +217,6 @@ public class ServerType5 {
             board.setCell(computerMove, computer.getId()); 
         }
         return responseFor(GameState.CONT, board);
-    }
-
-    private ServerAdvancedMess invalidResponse(ClientAdvancedMess request){
-        return new ServerAdvancedMess(GameState.INVALID, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
     }
 
     private String newNonce() {

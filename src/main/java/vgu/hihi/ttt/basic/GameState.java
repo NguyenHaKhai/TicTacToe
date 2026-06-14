@@ -7,5 +7,7 @@ public enum GameState {
     CONT,
     WIN,
     LOST,
-    DRAW
+    DRAW,
+    REPLAY,
+    TIMEOUT
 }

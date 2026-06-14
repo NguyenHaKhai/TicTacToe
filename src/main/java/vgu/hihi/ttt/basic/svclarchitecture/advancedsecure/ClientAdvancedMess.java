@@ -16,16 +16,16 @@ public record ClientAdvancedMess(
     public static ClientAdvancedMess parse(String requestLine) {
 
 
-        String[] parts = requestLine.split("\\|", 6);
-        if (parts.length != 6) {
+        String[] parts = requestLine.split("\\|", 5);
+        if (parts.length != 5) {
             throw new IllegalArgumentException("moveText|nonce|creationTime|Board_String|Hash_String");
         }
 
-        return new ClientAdvancedMess(parts[1].trim(),
-            parts[2].trim(),
-            Long.parseLong(parts[3].trim()),
-            parts[4].trim(),
-            parts[5].trim());
+        return new ClientAdvancedMess(parts[0].trim(),
+            parts[1].trim(),
+            Long.parseLong(parts[2].trim()),
+            parts[3].trim(),
+            parts[4].trim());
 
     }
 }
