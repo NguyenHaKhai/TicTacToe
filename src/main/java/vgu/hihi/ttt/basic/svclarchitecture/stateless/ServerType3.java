@@ -110,9 +110,11 @@ public class ServerType3 {
         switch(compMoveState){
             case GameState.WIN -> {return responseFor(GameState.LOST, board);} // send lost message to client
             case GameState.DRAW -> {return responseFor(GameState.DRAW, board);}
+            case GameState.CONT -> {return responseFor(GameState.CONT, board);}
+            default -> {System.out.println("Something is wrong. Game State of computer: " + compMoveState);
+                return responseFor(GameState.INVALID, board);
+            }
         }
-
-        return responseFor(GameState.CONT, board);
     }
 
     private boolean isStartGameRequest(ClientDumbMess request) {

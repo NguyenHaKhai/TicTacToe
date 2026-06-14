@@ -9,41 +9,41 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
 import vgu.hihi.ttt.basic.ComputerPlayer;
+import vgu.hihi.ttt.basic.GameLogic;
 import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.HumanPlayer;
 import vgu.hihi.ttt.basic.Player;
 import vgu.hihi.ttt.basic.settings.Constant;
-// TODO rewrite the javadoc to review the code
+
 /**
- * Stateless Server:
- * 1. Accept client connection and first start message.
- * 2. Read one request line.
- * 3. Parse move and board state.
- * 4. Reconstruct Board2D from the board state.
- * 5. Validate:
- *  - move is number
- *  - move is in range
- *  - target cell is empty
- *  - board shape is valid
- * 6. Apply human move.
- * 7. Check winner/draw/quit.
- * 8. If game continues, apply computer move.
- * 9. Check winner/draw again.
- * 10. Send structured response with official updated board.
+ * Stateless secure server using START/CHALLENGE and MOVE request packets.
+ * Board state is carried in the protocol; the server stores only consumed nonces
+ * long enough to reject replayed packets inside the token lifetime.
  */
 public class ServerType5 {
-    private static final String START_GAME_MESSAGE = "0|0|0|0";
 
     private final int port;
-    private final String secretKey;
-    private final Map<String, String> gameHashes;
+    private final SecretKeySpec secretKey;
+    private final SecureRandom secureRandom;
+    private final ScheduledExecutorService cleanupWorker;
+    private final ConcurrentSkipListSet<ExpirationEntry> expirationEntries;
+    private final Set<String> consumedNonces;
 
     public ServerType5() {
         this(Constant.DEFAULT_PORT);
@@ -51,44 +51,60 @@ public class ServerType5 {
 
     public ServerType5(int port) {
         this.port = port;
-        this.secretKey = UUID.randomUUID().toString();
-        this.gameHashes = new HashMap<>();
+        this.secretKey = new SecretKeySpec(UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8), Constant.HMAC_ALGORITHM);
+        this.secureRandom = new SecureRandom();
+        this.cleanupWorker = Executors.newSingleThreadScheduledExecutor();
+        this.expirationEntries = new ConcurrentSkipListSet<>();
+        this.consumedNonces = ConcurrentHashMap.newKeySet();
     }
 
     public void start() throws IOException {
+        startCleanupWorker();
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Stateless Secure server started on port " + port);
+            System.out.println("Advanced secure stateless server started on port " + port);
 
             while (true) {
-                try (Socket clientSocket = serverSocket.accept()) {
-                    System.out.println("Client connected!");
-                    handleClient(clientSocket);
-                } catch (IOException e) {
-                    System.err.println("Client request failed: " + e.getMessage());
-                }
+                Socket clientSocket = serverSocket.accept();
+                handleClient(clientSocket);
             }
+        } finally {
+            cleanupWorker.shutdown();
         }
     }
 
-    private void handleClient(Socket clientSocket) throws IOException {
-        BufferedReader input = new BufferedReader(
-            new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8)
+    private void startCleanupWorker() {
+        cleanupWorker.scheduleAtFixedRate(
+            this::evictExpiredNonces,
+            Constant.CLEANUP_PERIOD.toSeconds(),
+            Constant.CLEANUP_PERIOD.toSeconds(),
+            TimeUnit.SECONDS
         );
-        PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true, StandardCharsets.UTF_8);
+    }
 
-        String requestLine = input.readLine();
-        if (requestLine == null) {
-            return;
-        }
+    private void handleClient(Socket clientSocket) {
+        try (clientSocket;
+             BufferedReader input = new BufferedReader(
+                new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8)
+             );
+             PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true, StandardCharsets.UTF_8)) {
 
-        ServerAdvancedMess response;
-        try {
-            response = process(requestLine);
-        } catch (IllegalArgumentException e) {
-            response = new ServerAdvancedMess(GameState.INVALID, "0", "0", "0");
+            String requestLine = input.readLine();
+            if (requestLine == null) {
+                return;
+            }
+
+            ServerAdvancedMess response;
+            try {
+                response = process(requestLine);
+            } catch (IllegalArgumentException e) {
+                response = new ServerAdvancedMess(GameState.INVALID, "0", 0L, "0", "0");
+            }
+
+            output.println(response.toProtocolMessage());
+            System.out.println(response.toProtocolMessage());
+        } catch (IOException e) {
+            System.err.println("Client request failed: " + e.getMessage());
         }
-        output.println(response.toProtocolMessage());
-        System.out.println(response.toProtocolMessage());
     }
 
     private ServerAdvancedMess process(String requestLine) {
@@ -96,109 +112,128 @@ public class ServerType5 {
         System.out.println(request.toProtocolMessage());
 
         if (isStartGameRequest(request)) {
-            Board2D newBoard = new Board2D();
-            return createGame(newBoard);
+            String turnStart = request.boardMessage();
+            Board newBoard = new Board2D();
+            return createGame(newBoard, turnStart);
         }
 
-        String storedHash = gameHashes.get(request.gameId());
-        if (storedHash == null) {
-            return new ServerAdvancedMess(GameState.INVALID, request.boardMessage(), request.hashBoard(), request.gameId());
+        String expectedHash = hmac(request.boardMessage(), request.nonce(), request.creationTime());
+        if (MessageDigest.isEqual(expectedHash.getBytes(StandardCharsets.UTF_8), request.hash().getBytes(StandardCharsets.UTF_8))){
+            return invalidResponse(request);
         }
 
-        // protect integrity and defend against replay attacks
-        String requestBoardHash = hashBoard(request.boardMessage());
-        if (!storedHash.equals(request.hashBoard()) || !storedHash.equals(requestBoardHash)) {
-            return new ServerAdvancedMess(GameState.INVALID, request.boardMessage(), storedHash, request.gameId());
+        long now = System.currentTimeMillis();
+        long expirationTime = request.creationTime() + Constant.TOKEN_TTL.toMillis();
+        if (now > expirationTime) {
+            return invalidResponse(request);
         }
 
-        Board2D board = new Board2D();
+        if (!consumedNonces.add(request.nonce())) {
+            return invalidResponse(request);
+        }
+        expirationEntries.add(new ExpirationEntry(expirationTime, request.nonce()));
+
+        Board board = new Board2D();
         try {
             board.updateBoard(request.boardMessage());
         } catch (IllegalArgumentException e) {
-            return new ServerAdvancedMess(GameState.INVALID, request.boardMessage(), storedHash, request.gameId());
+            return invalidResponse(request);
         }
 
+        return processTurn(request.moveText(), board);
+    }
+
+    private ServerAdvancedMess processTurn(String moveText, Board board) {
         Player human = new HumanPlayer(
             Constant.HUMAN_ID,
-            new ByteArrayInputStream((request.moveText() + "\n").getBytes(StandardCharsets.UTF_8))
+            new ByteArrayInputStream((moveText + "\n").getBytes(StandardCharsets.UTF_8))
         );
         Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
 
-        int humanMove = human.makeMove(board);
-        GameState humanMoveState = mapHumanMoveState(humanMove);
-        if (humanMoveState != GameState.CONT) {
-            if (humanMoveState == GameState.END) {
-                return finishGame(request.gameId(), humanMoveState, board);
-            }
-            return responseFor(request.gameId(), humanMoveState, board);
-        }
-
-        board.setCell(humanMove, human.getId());
-        if (board.checkWinner3() == human.getId()) {
-            return finishGame(request.gameId(), GameState.WIN, board);
-        }
-        if (board.isFull()) {
-            return finishGame(request.gameId(), GameState.DRAW, board);
+        GameState humanState = GameLogic.applyMove(board, human, human.makeMove(board));
+        if (humanState != GameState.CONT) {
+            return responseFor(humanState, board);
         }
 
         int computerMove = computer.makeMove(board);
-        while(computerMove == -1) computerMove = computer.makeMove(board); // attempt until find a valid move
-
-        board.setCell(computerMove, computer.getId());
-        if (board.checkWinner3() == computer.getId()) {
-            return finishGame(request.gameId(), GameState.LOST, board);
-        }
-        if (board.isFull()) {
-            return finishGame(request.gameId(), GameState.DRAW, board);
+        while (computerMove == -1) {
+            computerMove = computer.makeMove(board);
         }
 
-        return responseFor(request.gameId(), GameState.CONT, board);
+        GameState computerState = GameLogic.applyMove(board, computer, computerMove);
+        switch(computerState){
+            case GameState.WIN -> {return responseFor(GameState.LOST, board);} // send lost message to client
+            case GameState.DRAW -> {return responseFor(GameState.DRAW, board);}
+            case GameState.CONT -> {return responseFor(GameState.CONT, board);}
+            default -> {System.out.println("Something is wrong. Game State of computer: " + computerState);
+                return responseFor(GameState.INVALID, board);
+            }
+        }
     }
 
-    private boolean isStartGameRequest(ClientAdvancedMess request) {
-        return START_GAME_MESSAGE.equals(request.toProtocolMessage());
-    }
-
-    private ServerAdvancedMess createGame(Board2D board) {
-        String gameId = UUID.randomUUID().toString();
-        return responseFor(gameId, GameState.CONT, board);
-    }
-
-    private ServerAdvancedMess responseFor(String gameId, GameState state, Board2D board) {
+    private ServerAdvancedMess responseFor(GameState state, Board board) {
         String boardMessage = board.toMessage();
-        String hashBoard = hashBoard(boardMessage);
-        gameHashes.put(gameId, hashBoard);
-        return new ServerAdvancedMess(state, boardMessage, hashBoard, gameId);
+        long creationTime = System.currentTimeMillis();
+        String nonce = newNonce();
+        String hash = hmac(boardMessage, nonce, creationTime);
+        return new ServerAdvancedMess(state, nonce, creationTime, boardMessage, hash);
     }
 
-    private ServerAdvancedMess finishGame(String gameId, GameState state, Board2D board) {
-        String boardMessage = board.toMessage();
-        String hashBoard = hashBoard(boardMessage);
-        gameHashes.remove(gameId);
-        return new ServerAdvancedMess(state, boardMessage, hashBoard, gameId);
-    }
-
-    private String hashBoard(String boardMessage) {
+    private String hmac(String boardMessage, String nonce, long creationTime) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest((boardMessage + secretKey).getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(hash.length * 2);
-            for (byte b : hash) {
+            Mac mac = Mac.getInstance(Constant.HMAC_ALGORITHM);
+            mac.init(secretKey);
+            byte[] bytes = mac.doFinal((boardMessage + nonce + creationTime).getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(bytes.length * 2);
+            for (byte b : bytes) {
                 hex.append(String.format("%02x", b));
             }
             return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is not available", e);
+        } catch (Exception e) {
+            throw new IllegalStateException("HMAC-SHA256 is not available", e);
         }
     }
 
-    private GameState mapHumanMoveState(int move) {
-        return switch (move) {
-            case -3 -> GameState.END;
-            case -2 -> GameState.OCCUPIED;
-            case -1 -> GameState.INVALID;
-            default -> GameState.CONT;
-        };
+    private boolean isStartGameRequest(ClientAdvancedMess request) {
+        return "START".equals(request.moveText());
+    }
+
+    private ServerAdvancedMess createGame(Board board, String turnStart) {
+        if(turnStart.equals(String.valueOf(Constant.COMPUTER_ID))) { // computer moves first
+            Player computer = new ComputerPlayer(Constant.COMPUTER_ID);
+            int computerMove = computer.makeMove(board);
+            while (computerMove == -1) {
+                computerMove = computer.makeMove(board); // attempt to find 1 valid move for computer
+            }
+            board.setCell(computerMove, computer.getId()); 
+        }
+        return responseFor(GameState.CONT, board);
+    }
+
+    private ServerAdvancedMess invalidResponse(ClientAdvancedMess request){
+        return new ServerAdvancedMess(GameState.INVALID, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
+    }
+
+    private String newNonce() {
+        byte[] bytes = new byte[Constant.NONCE_BYTES];
+        secureRandom.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    private void evictExpiredNonces() {
+        long now = System.currentTimeMillis();
+        int evicted = 0;
+
+        while (evicted < Constant.MAX_BATCH_SIZE) {
+            ExpirationEntry oldest = expirationEntries.isEmpty() ? null : expirationEntries.first();
+            if (oldest == null || oldest.expirationTime() >= now) {
+                return;
+            }
+            if (expirationEntries.remove(oldest)) {
+                consumedNonces.remove(oldest.nonce());
+                evicted++;
+            }
+        }
     }
 
     public static void main(String[] args) {
@@ -210,8 +245,7 @@ public class ServerType5 {
         try {
             new ServerType5(port).start();
         } catch (IOException e) {
-            System.err.println("Failed to start Type 4 server: " + e.getMessage());
+            System.err.println("Failed to start Type 5 server: " + e.getMessage());
         }
     }
-
 }

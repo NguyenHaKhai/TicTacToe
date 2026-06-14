@@ -90,14 +90,14 @@ public class ServerType4 {
         // Protect board integrity. Replay protection can be added by the game-id based protocol.
         String requestBoardHash = hashBoard(request.boardMessage());
         if (!request.hashBoard().equals(requestBoardHash)) {
-            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), requestBoardHash);
+            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), request.hashBoard());
         }
 
         Board board = new Board2D();
         try {
             board.updateBoard(request.boardMessage());
         } catch (IllegalArgumentException e) {
-            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), requestBoardHash);
+            return new ServerSecureMess(GameState.INVALID, request.boardMessage(), request.hashBoard());
         }
 
         Player human = new HumanPlayer(
@@ -119,9 +119,11 @@ public class ServerType4 {
         switch(compMoveState){
             case GameState.WIN -> {return responseFor(GameState.LOST, board);} // send lost message to client
             case GameState.DRAW -> {return responseFor(GameState.DRAW, board);}
+            case GameState.CONT -> {return responseFor(GameState.CONT, board);}
+            default -> {System.out.println("Something is wrong. Game State of computer: " + compMoveState);
+                return responseFor(GameState.INVALID, board);
+            }
         }
-
-        return responseFor(GameState.CONT, board);
     }
 
     private boolean isStartGameRequest(ClientSecureMess request) {

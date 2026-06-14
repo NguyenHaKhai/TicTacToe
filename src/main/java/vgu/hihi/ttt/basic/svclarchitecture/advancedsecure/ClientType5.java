@@ -13,54 +13,36 @@ import vgu.hihi.ttt.basic.GameState;
 import vgu.hihi.ttt.basic.settings.Constant;
 // TODO rewrite the javadoc to review the code
 /**
- * Fat Client with more logic to handle the scalability issue.
- 1. Initialize empty local board.
-2. Print local board.
-3. Ask user for move.
-4. Send move + current board to server.
-5. Receive structured response.
-6. Replace local board with board returned by server.
-7. Print message/result.
-8. If status is WIN, DRAW, or QUIT, close.
-9. Otherwise continue.
- */
-/**
- * Fat client.
- * 1- Initialize empty local board.
- * 2- Print local board.
- * 3- Ask user for move.
- * 4- Send move + current board to server.
- * 5- Receive structured repsonse.
- * 6- Replace local board with board returned by server.
- * 7- Print message/result
- * 8- If status is WIN, DRAW, or QUIT, close.
- * 9- Otherwise continue.
+ * Client that needs to send more things. It is hard to commit replay attacks now
  */
 public class ClientType5 {
     private final String host;
     private final int port;
+    private final String turnStart;
     private final Board2D board;
     private final Scanner scanner;
-    private String hashBoard;
-    private String gameId;
+    private String hash;
+    private String nonce;
+    private long creationTime;
 
     public ClientType5() {
-        this(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT);
+        this(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT, Constant.DEFAULT_START);
     }
 
-    public ClientType5(String host, int port) {
+    public ClientType5(String host, int port, String turnStart) {
         this.host = host;
         this.port = port;
+        this.turnStart = turnStart;
         this.board = new Board2D();
         this.scanner = new Scanner(System.in);
     }
 
     public void start() {
         System.out.println("========== TIC-TAC-TOE ==========");
-        System.out.println("Connected mode: secure stateless TCP request/response");
+        System.out.println("Connected mode: advanced secure stateless TCP request/response");
 
         try {
-            ServerAdvancedMess response = sendMessage(new ClientAdvancedMess("0", "0", "0", "0"));
+            ServerAdvancedMess response = sendMessage(new ClientAdvancedMess("START", turnStart, 0, "0", "0"));
             updateLocalState(response);
         } catch (IOException e) {
             System.err.println("Could not start game: " + e.getMessage());
@@ -105,7 +87,7 @@ public class ClientType5 {
     }
 
     private ServerAdvancedMess sendOneTurn(String moveText) throws IOException {
-        return sendMessage(new ClientAdvancedMess(moveText, board.toMessage(), hashBoard, gameId));
+        return sendMessage(new ClientAdvancedMess(moveText, nonce, creationTime, board.toMessage(), hash));
     }
 
     private ServerAdvancedMess sendMessage(ClientAdvancedMess request) throws IOException {
@@ -130,8 +112,9 @@ public class ClientType5 {
         if (!response.boardMessage().isBlank()) {
             board.updateBoard(response.boardMessage());
         }
-        hashBoard = response.hashBoard();
-        gameId = response.gameId();
+        hash = response.hash();
+        nonce = response.nonce();
+        creationTime = response.creationTime();
     }
 
     private void printResult(GameState state) {
@@ -156,15 +139,19 @@ public class ClientType5 {
     public static void main(String[] args) {
         String host = Constant.DEFAULT_HOST;
         int port = Constant.DEFAULT_PORT;
+        String turnStart = Constant.DEFAULT_START;
 
         if (args.length > 0) {
-            host = args[0];
+            turnStart = args[0];
         }
         if (args.length > 1) {
-            port = Integer.parseInt(args[1]);
+            host = args[1];
+        }
+        if (args.length > 2){
+            port = Integer.parseInt(args[2]);
         }
 
-        new ClientType5(host, port).start();
+        new ClientType5(host, port, turnStart).start();
     }
 
 }

@@ -1,23 +1,31 @@
 package vgu.hihi.ttt.basic.svclarchitecture.advancedsecure;
 
-public record ClientAdvancedMess(String moveText, String boardMessage, String hashBoard, String gameId) {
-    
+
+public record ClientAdvancedMess(
+    String moveText,
+    String nonce,
+    long creationTime,
+    String boardMessage,
+    String hash
+) {
+
     public String toProtocolMessage() {
-        return moveText + "|" + boardMessage + "|" + hashBoard + "|" + gameId;
+        return moveText + "|" + nonce + "|" + creationTime + "|" + boardMessage + "|" + hash;
     }
-    
+
     public static ClientAdvancedMess parse(String requestLine) {
-        String[] parts = requestLine.split("\\|", 4);
-        if (parts.length != 4) {
-            throw new IllegalArgumentException("Move_made|Board_String|Hash_Board|Game_ID");
+
+
+        String[] parts = requestLine.split("\\|", 6);
+        if (parts.length != 6) {
+            throw new IllegalArgumentException("moveText|nonce|creationTime|Board_String|Hash_String");
         }
 
-        String moveText = parts[0].trim();
-        String boardMessage = parts[1].trim();
-        String hashBoard = parts[2].trim();
-        String gameId = parts[3].trim();
+        return new ClientAdvancedMess(parts[1].trim(),
+            parts[2].trim(),
+            Long.parseLong(parts[3].trim()),
+            parts[4].trim(),
+            parts[5].trim());
 
-
-        return new ClientAdvancedMess(moveText, boardMessage, hashBoard, gameId);
     }
 }
