@@ -11,9 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,7 +41,6 @@ public class ServerType5 {
     private final SecureRandom secureRandom;
     private final ScheduledExecutorService cleanupWorker;
     private final ConcurrentSkipListSet<ExpirationEntry> expirationEntries;
-    private final Set<String> consumedNonces;
 
     public ServerType5() {
         this(Constant.DEFAULT_PORT);
@@ -55,7 +52,6 @@ public class ServerType5 {
         this.secureRandom = new SecureRandom();
         this.cleanupWorker = Executors.newSingleThreadScheduledExecutor();
         this.expirationEntries = new ConcurrentSkipListSet<>();
-        this.consumedNonces = ConcurrentHashMap.newKeySet();
     }
 
     public void start() throws IOException {
@@ -120,7 +116,7 @@ public class ServerType5 {
 
         String expectedHash = hmac(request.boardMessage(), request.nonce(), request.creationTime());
         if (!MessageDigest.isEqual(expectedHash.getBytes(StandardCharsets.UTF_8), request.hash().getBytes(StandardCharsets.UTF_8))){
-            System.out.println("Wrong hash?");
+            System.out.println("Diff Hash: Some info was changed!");
             return new ServerAdvancedMess(GameState.INVALID, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
         }
 
@@ -137,10 +133,9 @@ public class ServerType5 {
             return new ServerAdvancedMess(GameState.TIMEOUT, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
         }
 
-        if (!consumedNonces.add(request.nonce())) {
+        if (!expirationEntries.add(new ExpirationEntry(expirationTime, request.nonce()))) {
             return new ServerAdvancedMess(GameState.REPLAY, request.nonce(), request.creationTime(), request.boardMessage(), request.hash());
         }
-        expirationEntries.add(new ExpirationEntry(expirationTime, request.nonce()));
 
         Board board = new Board2D();
         try {
@@ -235,7 +230,6 @@ public class ServerType5 {
                 return;
             }
             if (expirationEntries.remove(oldest)) {
-                consumedNonces.remove(oldest.nonce());
                 evicted++;
             }
         }
