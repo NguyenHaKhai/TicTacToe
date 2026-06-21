@@ -15,7 +15,7 @@ public final class Constant {
     public static final String EMPTY_SYMBOL = "-";
 
 
-    public static final Duration TOKEN_TTL = Duration.ofSeconds(20);
+    public static final Duration TOKEN_TTL = Duration.ofSeconds(10);
     public static final Duration CLEANUP_PERIOD = Duration.ofSeconds(5);
     public static final int MAX_BATCH_SIZE = 1_000;
     public static final int NONCE_BYTES = 24;
