@@ -1,12 +1,14 @@
 package vgu.hihi.ttt.basic.svclarchitecture.http;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Scanner;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import vgu.hihi.ttt.basic.Board;
 import vgu.hihi.ttt.basic.Board2D;
@@ -20,23 +22,26 @@ import vgu.hihi.ttt.basic.settings.Constant;
  * START|1 for human to start
  * START|2 for computer to start
  */
-public class ClientType3 {
+public class HttpTicTacToeClient {
     private final String host;
     private final int port;
     private final String turnStart;
     private final Board board;
     private final Scanner scanner;
+    private final HttpClient client;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ClientType3() {
+    public HttpTicTacToeClient() {
         this(Constant.DEFAULT_HOST, Constant.DEFAULT_PORT, Constant.DEFAULT_START);
     }
 
-    public ClientType3(String host, int port, String turnStart) {
+    public HttpTicTacToeClient(String host, int port, String turnStart) {
         this.host = host;
         this.port = port;
         this.turnStart = turnStart;
         this.board = new Board2D();
         this.scanner = new Scanner(System.in);
+        this.client = HttpClient.newHttpClient();
     }
 
     public void start() {
@@ -93,20 +98,50 @@ public class ClientType3 {
     }
 
     private ServerDumbMess sendMessage(ClientDumbMess request) throws IOException {
-        try (Socket socket = new Socket(host, port);
-             BufferedReader input = new BufferedReader(
-                new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8)
-             );
-             PrintWriter output = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8)) {
+        // try (Socket socket = new Socket(host, port);
+        //      BufferedReader input = new BufferedReader(
+        //         new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8)
+        //      );
+        //      PrintWriter output = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8)) {
 
-            output.println(request.toProtocolMessage());
+        //     output.println(request.toProtocolMessage());
 
-            String responseLine = input.readLine();
-            if (responseLine == null) {
-                throw new IOException("server closed the connection without a response");
+        //     String responseLine = input.readLine();
+        //     if (responseLine == null) {
+        //         throw new IOException("server closed the connection without a response");
+        //     }
+
+        //     return ServerDumbMess.parse(responseLine);
+        // }
+        String jsonPayload = objectMapper.writeValueAsString(request);
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://" + host + ":" + port + "/move"))
+                .header("Content-Type", "application/json") // Define the header
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload)) // Attach the body payload
+                .build();
+        
+        try {
+            HttpResponse<InputStream> httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
+
+            int status = httpResponse.statusCode();
+
+            if(status != 200){
+                throw new IOException("Server returned HTTP " + status);
             }
 
-            return ServerDumbMess.parse(responseLine);
+            try (InputStream stream = httpResponse.body()) {
+                // Jackson parses the network stream bytes on-the-fly directly into your record
+                ServerDumbMess data = objectMapper.readValue(stream, ServerDumbMess.class);
+                return data;
+            }
+
+        } catch (IOException e) {
+            throw new IOException("Something went wrong in sendMessage()", e);
+        }
+        catch(InterruptedException e){
+            Thread.currentThread().interrupt();
+            throw new IOException("Request interrupted", e);
         }
     }
 
@@ -155,7 +190,7 @@ public class ClientType3 {
             port = Integer.parseInt(args[2]);
         }
 
-        new ClientType3(host, port, turnStart).start();
+        new HttpTicTacToeClient(host, port, turnStart).start();
     }
 
 }

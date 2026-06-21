@@ -67,7 +67,7 @@ public class HttpTicTacToeServer {
 
             ServerDumbMess response;
             try {
-                response = process(requestLine);
+                response = process(requestData);
             } catch (IllegalArgumentException e) {
                 response = new ServerDumbMess(GameState.INVALID, "0");
             }
@@ -79,8 +79,7 @@ public class HttpTicTacToeServer {
         }
     }
 
-    private ServerDumbMess process(String requestLine) {
-        ClientDumbMess request = ClientDumbMess.parse(requestLine);
+    private ServerDumbMess process(ClientDumbMess request) {
         System.out.println(request.toProtocolMessage());
 
         if (isStartGameRequest(request)) {
