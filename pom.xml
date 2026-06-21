@@ -182,6 +182,46 @@
                         <appendAssemblyId>false</appendAssemblyId>
                     </configuration>
                 </execution>
+                <!-- ServerType5 JAR -->
+                <execution>
+                    <id>server-type5-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.advancedsecure.ServerType5</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-server-type5-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- HttpTicTacToeServer JAR -->
+                <execution>
+                    <id>server-http-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.http.HttpTicTacToeServer</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-server-http-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
                 <!-- Client JAR (type1 and type2) -->
                 <execution>
                     <id>client-jar</id>
@@ -239,6 +279,46 @@
                             <descriptorRef>jar-with-dependencies</descriptorRef>
                         </descriptorRefs>
                         <finalName>ttt-client-type4-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- ClientType5 JAR -->
+                <execution>
+                    <id>client-type5-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.advancedsecure.ClientType5</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-client-type5-${project.version}</finalName>
+                        <appendAssemblyId>false</appendAssemblyId>
+                    </configuration>
+                </execution>
+                <!-- HttpTicTacToeClient JAR -->
+                <execution>
+                    <id>client-http-jar</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>vgu.hihi.ttt.basic.svclarchitecture.http.HttpTicTacToeClient</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <finalName>ttt-client-http-${project.version}</finalName>
                         <appendAssemblyId>false</appendAssemblyId>
                     </configuration>
                 </execution>
