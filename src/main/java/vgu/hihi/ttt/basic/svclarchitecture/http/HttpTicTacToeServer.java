@@ -52,6 +52,27 @@ public class HttpTicTacToeServer {
 
     private void handleClient(HttpExchange exchange) throws IOException {
         try {
+
+            // add CORS headers to EVERY single incoming request
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+
+            // allow control methods
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+
+            // allow Content-Type
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+
+            // specify the body type we send: json
+            exchange.getResponseHeaders().add("Content-Type", "application/json; charset=utf-8");
+
+            // Intercept and handle HTTP OPTIONS preflight requests. Client sends this first before the actual control method
+            if("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())){
+                // Preflight requests only require headers and a 204 No Content status
+                exchange.sendResponseHeaders(204, -1);
+                exchange.close();
+                return;
+            }
+
             if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 sendResponse(exchange, 405, new ServerDumbMess(GameState.INVALID, "Only POST requests are supported"));
                 return;
@@ -149,10 +170,6 @@ public class HttpTicTacToeServer {
             int statusCode,
             ServerDumbMess responseBody) throws IOException {
 
-
-        // specify the body type we send: json
-        exchange.getResponseHeaders().add("Content-Type", "application/json; charset=utf-8");
-
         // send the header first, then the data
         try (OutputStream outputStream = exchange.getResponseBody()) {
 
@@ -163,6 +180,7 @@ public class HttpTicTacToeServer {
             // here we specify how many bytes is sent. 0 is for chunk(not known exactly how many bytes)
             // -1 is for no bytes(no payload)
             exchange.sendResponseHeaders(statusCode, jsonBytes.length);
+
             // send the data
             outputStream.write(jsonBytes);
         }

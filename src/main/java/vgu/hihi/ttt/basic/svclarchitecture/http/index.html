@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+```
+<title>Tic Tac Toe</title>
+
+<style>
+    /*
+     * CSS controls how the page looks.
+     * Do not worry if everything looks unfamiliar.
+     * Think of CSS as "appearance settings".
+     */
+
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+
+        margin-top: 30px;
+    }
+
+    h1 {
+        margin-bottom: 20px;
+    }
+
+    /*
+     * The board is a 3x3 grid.
+     */
+    #board {
+        display: grid;
+
+        grid-template-columns: repeat(3, 100px);
+        grid-template-rows: repeat(3, 100px);
+
+        gap: 5px;
+
+        justify-content: center;
+
+        margin-top: 20px;
+    }
+
+    /*
+     * One square of the board.
+     */
+    .cell {
+        border: 2px solid black;
+
+        font-size: 40px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        cursor: pointer;
+
+        user-select: none;
+    }
+
+    .cell:hover {
+        background-color: lightgray;
+    }
+
+    #status {
+        margin-top: 20px;
+
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    button {
+        padding: 10px 20px;
+
+        margin: 5px;
+
+        cursor: pointer;
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+```
+<h1>Tic Tac Toe</h1>
+
+<!--
+    Start game buttons.
+    Human First = send START|1
+    Computer First = send START|2
+-->
+<button onclick="startGame(1)">
+    Human First
+</button>
+
+<button onclick="startGame(2)">
+    Computer First
+</button>
+
+<div id="status">
+    Press a button to start.
+</div>
+
+<div id="board"></div>
+
+<script>
+
+    /*
+     * This variable stores the board string
+     * returned by your Java server.
+     *
+     * Example:
+     * "0 0 1 0 2 0 0 0 0"
+     */
+    let currentBoard = "";
+
+    /*
+     * True when game is finished.
+     */
+    let gameOver = false;
+
+    /*
+     * Build the 3x3 board.
+     */
+    createBoard();
+
+    function createBoard() {
+
+        const board = document.getElementById("board");
+
+        for (let i = 0; i < 9; i++) {
+
+            const cell = document.createElement("div");
+
+            cell.className = "cell";
+
+            /*
+             * Store board position.
+             */
+            cell.dataset.position = i;
+
+            /*
+             * When user clicks:
+             */
+            cell.addEventListener("click", () => {
+
+                if (gameOver) {
+                    return;
+                }
+
+                sendMove(i + 1);
+            });
+
+            board.appendChild(cell);
+        }
+    }
+
+    /*
+     * Start a new game.
+     *
+     * turnStart = 1 => human
+     * turnStart = 2 => computer
+     */
+    async function startGame(turnStart) {
+
+        gameOver = false;
+
+        const requestBody = {
+            moveText: "START",
+            boardMessage: String(turnStart)
+        };
+
+        const response = await sendRequest(requestBody);
+
+        updateGame(response);
+    }
+
+    /*
+     * Send player's move.
+     *
+     * moveNumber must be 1..9
+     */
+    async function sendMove(moveNumber) {
+
+        if (currentBoard === "") {
+            alert("Please start a game first.");
+            return;
+        }
+
+        const requestBody = {
+            moveText: String(moveNumber),
+            boardMessage: currentBoard
+        };
+
+        const response = await sendRequest(requestBody);
+
+        updateGame(response);
+    }
+
+    /*
+     * Common function for talking to your Java server.
+     */
+    async function sendRequest(requestBody) {
+
+        try {
+
+            const response = await fetch(
+                "http://localhost:1234/move",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(requestBody)
+                }
+            );
+
+            return await response.json();
+
+        } catch (error) {
+
+            alert(
+                "Cannot connect to server.\n" +
+                "Is your Java server running?"
+            );
+
+            throw error;
+        }
+    }
+
+    /*
+     * Update everything after server response.
+     */
+    function updateGame(serverResponse) {
+
+        /*
+         * Example response:
+         *
+         * {
+         *   state: "CONT",
+         *   boardMessage: "0 0 1 0 2 0 0 0 0"
+         * }
+         */
+
+        currentBoard = serverResponse.boardMessage;
+
+        drawBoard(currentBoard);
+
+        showState(serverResponse.state);
+    }
+
+    /*
+     * Draw board using the board string.
+     */
+    function drawBoard(boardString) {
+
+        const cells =
+            document.querySelectorAll(".cell");
+
+        const boardArray = boardString.trim().split(' ')
+
+        for (let i = 0; i < boardArray.length; i++) {
+
+            const value = boardArray[i];
+
+            if (value === "1") {
+                cells[i].textContent = "X";
+            }
+            else if (value === "2") {
+                cells[i].textContent = "O";
+            }
+            else {
+                cells[i].textContent = "";
+            }
+        }
+    }
+
+    /*
+     * Convert GameState into readable text.
+     */
+    function showState(state) {
+
+        const status =
+            document.getElementById("status");
+
+        switch (state) {
+
+            case "CONT":
+                status.textContent =
+                    "Your turn";
+                break;
+
+            case "INVALID":
+                status.textContent =
+                    "Invalid move";
+                break;
+
+            case "OCCUPIED":
+                status.textContent =
+                    "Cell already occupied";
+                break;
+
+            case "WIN":
+                status.textContent =
+                    "You won!";
+                gameOver = true;
+                break;
+
+            case "LOST":
+                status.textContent =
+                    "Computer won!";
+                gameOver = true;
+                break;
+
+            case "DRAW":
+                status.textContent =
+                    "Draw!";
+                gameOver = true;
+                break;
+
+            case "END":
+                status.textContent =
+                    "Game ended";
+                gameOver = true;
+                break;
+        }
+    }
+
+</script>
+```
+
+</body>
+
+</html>
